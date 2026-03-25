@@ -1,0 +1,9 @@
+<div class="space-y-12">
+
+    <h1>
+        Bem Vindo, <%= Current.user.name %> !
+    </h1>
+
+    <%= button_to "Logout", session_path, method: :delete %>
+
+</div>
