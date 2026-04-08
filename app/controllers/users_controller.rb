@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  allow_unauthenticated_access only: %i[new create]
+  allow_unauthenticated_access only: %i[new create show]
   # Optional: protect against mass signup abuse
   rate_limit to: 5, within: 10.minutes, only: :create, with: -> { redirect_to signup_path, alert: "Try again later." }
 
@@ -16,6 +16,11 @@ class UsersController < ApplicationController
       flash.now[:alert] = "Please fix the errors below."
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def show
+    @user = User.find(params[:id])
+    @posts = @user.posts.recent
   end
 
   private

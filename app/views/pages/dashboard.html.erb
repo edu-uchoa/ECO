@@ -1,18 +1,15 @@
 <div class="space-y-12">
 
     <h1 class="text-3xl font-bold">
-        Bem Vindo, <%= Current.user.name %> !
+        Bem-vindo, <%= Current.user.name %>! 👋
     </h1>
 
     <div class="flex gap-4">
-        <%= link_to "Meu Perfil", profile_path, class: "rounded-lg bg-blue-600 px-3 py-2 text-center font-semibold text-white shadow-sm hover:bg-blue-500 active:bg-blue-700" %>
-        <%= link_to "Criar Novo Post", new_post_path, class: "rounded-lg bg-green-600 px-3 py-2 text-center font-semibold text-white shadow-sm hover:bg-green-500 active:bg-green-700" %>
-        <%= button_to "Logout", session_path, method: :delete, class: "rounded-lg bg-red-600 px-3 py-2 font-semibold text-white shadow-sm hover:bg-red-500 active:bg-red-700" %>
+        <%= link_to "Criar Novo Post", new_post_path, class: "rounded-lg bg-green-600 px-4 py-2 text-center font-semibold text-white shadow-sm hover:bg-green-500 active:bg-green-700" %>
     </div>
 
     <% if Current.user.posts.any? %>
-        <div class="space-y-4">
-            <h2 class="text-2xl font-bold">Meus Posts</h2>
+        <div class="space-y-4">            <h2 class="text-2xl font-bold">Meus Posts</h2>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <% Current.user.posts.recent.each do |post| %>
                     <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
@@ -72,7 +69,7 @@
                         
                         <div class="p-4 space-y-2">
                             <h3 class="font-bold text-gray-900"><%= post.title %></h3>
-                            <p class="text-xs text-gray-600">Por <%= post.user.name %></p>
+                            <p class="text-xs text-gray-600">Por <%= link_to post.user.name, user_path(post.user), class: "text-blue-600 hover:text-blue-800 hover:underline" %></p>
                             <p class="line-clamp-2 text-sm text-gray-700"><%= post.description %></p>
                             
                             <div class="flex flex-wrap gap-1">
