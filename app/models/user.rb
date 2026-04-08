@@ -20,5 +20,9 @@ class User < ApplicationRecord
             length: { minimum: 6 },
             allow_blank: true,
             if: -> { !new_record? }
+
+  def profile_complete?
+    cpf.present? && telefone.present? && uf.present? && cidade.present?
+  end
 end
 

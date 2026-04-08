@@ -27,6 +27,33 @@
         <%= form.email_field :email_address, class: "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" %>
       </div>
 
+      <div class="rounded-lg bg-green-50 p-4">
+        <h3 class="font-semibold text-green-900">Informações Pessoais</h3>
+        <p class="mt-1 text-sm text-green-700">Estes campos são obrigatórios para criar posts</p>
+      </div>
+
+      <div>
+        <%= form.label :cpf, "CPF" %>
+        <%= form.number_field :cpf, class: "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500", placeholder: "Apenas números" %>
+      </div>
+
+      <div>
+        <%= form.label :telefone, "Telefone" %>
+        <%= form.number_field :telefone, class: "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500", placeholder: "Apenas números" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= form.label :uf, "UF" %>
+          <%= form.text_field :uf, class: "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500", placeholder: "Ex: SP", maxlength: 2 %>
+        </div>
+
+        <div>
+          <%= form.label :cidade, "Cidade" %>
+          <%= form.text_field :cidade, class: "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500", placeholder: "Ex: São Paulo" %>
+        </div>
+      </div>
+
       <div class="rounded-lg bg-blue-50 p-4">
         <h3 class="font-semibold text-blue-900">Alteração de Senha</h3>
         <p class="mt-1 text-sm text-blue-700">Deixe os campos vazios se não quiser alterar a senha</p>

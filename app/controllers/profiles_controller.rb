@@ -36,7 +36,7 @@ end
   end
 
   def user_params
-    permitted = params.require(:user).permit(:name, :email_address, :password, :password_confirmation)
+    permitted = params.require(:user).permit(:name, :email_address, :password, :password_confirmation, :cpf, :telefone, :uf, :cidade)
 
         if permitted[:password].blank?
             permitted.delete(:password)
