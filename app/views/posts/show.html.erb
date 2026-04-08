@@ -1,0 +1,54 @@
+<div class="space-y-8">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold"><%= @post.title %></h1>
+      <p class="text-gray-600 mt-2">Por <%= @post.user.name %></p>
+    </div>
+    <% if @post.user == Current.user %>
+      <div class="flex gap-2">
+        <%= link_to "Editar", edit_post_path(@post), class: "rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-blue-500" %>
+        <%= button_to "Deletar", post_path(@post), method: :delete, data: { confirm: "Tem certeza?" }, class: "rounded-lg bg-red-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-red-500" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @post.images.attached? %>
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <% @post.images.each do |image| %>
+        <div class="rounded-lg overflow-hidden">
+          <%= image_tag image, alt: "preview", class: "h-96 w-full object-cover" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div class="rounded-lg bg-gray-50 p-4">
+      <p class="text-sm text-gray-600">Categoria</p>
+      <p class="mt-1 font-semibold"><%= @post.category %></p>
+    </div>
+    <div class="rounded-lg bg-gray-50 p-4">
+      <p class="text-sm text-gray-600">Condição</p>
+      <p class="mt-1 font-semibold"><%= @post.condition %></p>
+    </div>
+    <div class="rounded-lg bg-gray-50 p-4">
+      <p class="text-sm text-gray-600">Localização</p>
+      <p class="mt-1 font-semibold"><%= @post.location %></p>
+    </div>
+    <div class="rounded-lg bg-gray-50 p-4">
+      <p class="text-sm text-gray-600">Data</p>
+      <p class="mt-1 font-semibold"><%= l(@post.created_at, format: :short) %></p>
+    </div>
+  </div>
+
+  <div>
+    <h2 class="text-2xl font-bold">Descrição</h2>
+    <p class="mt-4 whitespace-pre-wrap text-gray-700"><%= @post.description %></p>
+  </div>
+
+  <%= link_to "Voltar", posts_path, class: "rounded-lg bg-gray-300 px-4 py-2 font-semibold text-gray-900 shadow-sm hover:bg-gray-400" %>
+</div>
+
+<div class="mb-4">
+  <%= js_back_button "Back", class: "px-3 py-2 rounded bg-gray-100 text-sm" %>
+</div>
