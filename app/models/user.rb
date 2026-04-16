@@ -2,7 +2,14 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :posts, dependent: :destroy
-  has_many :chat_messages, dependent: :destroy
+
+  has_many :sent_conversations, class_name: "PrivateConversation", foreign_key: :sender_id, dependent: :destroy
+  has_many :received_conversations, class_name: "PrivateConversation", foreign_key: :receiver_id, dependent: :destroy
+  has_many :messages, dependent: :destroy
+
+  def conversations
+    PrivateConversation.where("sender_id = ? OR receiver_id = ?", id, id)
+  end
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 

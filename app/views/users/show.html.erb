@@ -4,6 +4,10 @@
       <h1 class="text-3xl font-bold"><%= @user.name %></h1>
       <p class="text-gray-600 mt-2">Perfil de Usuário</p>
     </div>
+    <% if authenticated? && Current.user != @user %>
+      <%= button_to "Iniciar Chat", private_conversations_path(user_id: @user.id), method: :post,
+        class: "rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 active:bg-green-700" %>
+    <% end %>
   </div>
 
   <% if @posts.any? %>
@@ -54,7 +58,4 @@
     </div>
   <% end %>
 
-<div class="mb-4">
-  <%= js_back_button "Back", class: "px-3 py-2 rounded bg-gray-100 text-sm" %>
-</div>
 

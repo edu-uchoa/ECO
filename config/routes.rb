@@ -4,7 +4,9 @@ Rails.application.routes.draw do
   resources :users, only: [:new, :create, :show]
   resource :profile, only: [:show, :edit, :update, :destroy]
   resources :posts
-  resources :chats, only: [:index, :create]
+  resources :private_conversations, only: [:index, :create, :show] do
+    resources :messages, only: [:create]
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -2,8 +2,10 @@
 
 one:
   user: one
+  private_conversation: one
   content: MyText
 
 two:
   user: two
+  private_conversation: two
   content: MyText
