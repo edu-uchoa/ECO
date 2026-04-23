@@ -20,7 +20,8 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
-    @posts = @user.posts.recent
+    @available_posts = @user.posts.where(status: "available").recent
+    @taken_posts = @user.posts.where(status: "taken").recent
   end
 
   private
