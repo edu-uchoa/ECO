@@ -1,7 +1,7 @@
 class PostsController < ApplicationController
   allow_unauthenticated_access only: [:index]
-  before_action :set_post, only: [:show, :edit, :update, :destroy]
-  before_action :require_authentication, only: [:show, :new, :create, :edit, :update, :destroy]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :claim]
+  before_action :require_authentication, only: [:show, :new, :create, :edit, :update, :destroy, :claim]
   before_action :check_profile_complete, only: [:new, :create]
   before_action :authorize_user!, only: [:edit, :update, :destroy]
 
@@ -42,6 +42,35 @@ class PostsController < ApplicationController
   def destroy
     @post.destroy
     redirect_to dashboard_path, notice: "Post deletado com sucesso!"
+  end
+
+  def claim
+    if @post.user == Current.user
+      redirect_to @post, alert: "Você não pode reivindicar seu próprio item."
+      return
+    end
+
+    if @post.status == "taken"
+      redirect_to @post, alert: "Este item já foi doado."
+      return
+    end
+
+    conversation = PrivateConversation.between(Current.user, @post.user)
+
+    if conversation.nil?
+      conversation = PrivateConversation.create!(
+        sender: Current.user,
+        receiver: @post.user
+      )
+    end
+
+    conversation.messages.create!(
+      user: Current.user,
+      content: "Estou interessado no seu item: \"#{@post.title}\"",
+      post: @post
+    )
+
+    redirect_to conversation, notice: "Mensagem de interesse enviada!"
   end
 
   private

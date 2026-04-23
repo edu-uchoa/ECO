@@ -21,10 +21,19 @@
   <% if @posts.any? %>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       <% @posts.each do |post| %>
-        <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <div class="overflow-hidden rounded-lg border <%= post.status == 'taken' ? 'border-red-200 opacity-75' : 'border-gray-200' %> shadow-sm hover:shadow-md transition-shadow relative">
+          <% if post.status == "taken" %>
+            <div class="absolute top-2 left-2 z-10 rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white shadow">
+              🔒 Doado
+            </div>
+          <% else %>
+            <div class="absolute top-2 left-2 z-10 rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white shadow">
+              ✅ Disponível
+            </div>
+          <% end %>
           <% if post.images.attached? %>
             <div class="h-48 overflow-hidden bg-gray-100">
-              <%= image_tag post.images.first, alt: post.title, class: "h-full w-full object-cover" %>
+              <%= image_tag post.images.first, alt: post.title, class: ["h-full w-full object-cover", post.status == "taken" ? "grayscale" : nil].compact.join(" ") %>
             </div>
           <% else %>
             <div class="h-48 bg-gray-200 flex items-center justify-center">

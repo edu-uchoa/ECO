@@ -30,6 +30,16 @@
             <p class="text-xs font-semibold mb-1 text-gray-500"><%= message.user.name %></p>
           <% end %>
           <p class="text-sm whitespace-pre-wrap"><%= message.content %></p>
+          <% if message.claim_message? && message.post && message.post.user == Current.user && message.post.status == "available" %>
+            <div class="mt-2 flex gap-2">
+              <%= button_to "✅ Aceitar", accept_claim_private_conversation_message_path(@conversation, message),
+                  method: :post,
+                  class: "rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white hover:bg-green-600" %>
+              <%= button_to "❌ Recusar", reject_claim_private_conversation_message_path(@conversation, message),
+                  method: :post,
+                  class: "rounded-full bg-red-500 px-3 py-1 text-xs font-semibold text-white hover:bg-red-600" %>
+            </div>
+          <% end %>
           <p class="text-xs mt-1 <%= mine ? 'text-blue-200' : 'text-gray-400' %>"><%= l(message.created_at, format: :short) rescue message.created_at.strftime("%H:%M") %></p>
         </div>
       </div>

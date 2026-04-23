@@ -1,6 +1,9 @@
 class Post < ApplicationRecord
   belongs_to :user
   has_many_attached :images
+  has_many :claim_messages, class_name: "Message", dependent: :nullify
+
+  STATUSES = %w[available taken].freeze
 
   validates :title, presence: true, length: { minimum: 3, maximum: 100 }
   validates :description, presence: true, length: { minimum: 10, maximum: 1000 }
@@ -8,6 +11,9 @@ class Post < ApplicationRecord
   validates :location, presence: true, length: { minimum: 5, maximum: 100 }
   validates :condition, presence: true
   validates :images, presence: true
+  validates :status, inclusion: { in: STATUSES }
+
+  scope :available, -> { where(status: "available") }
 
   CATEGORIES = [
     "Eletrônicos",

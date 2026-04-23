@@ -3,9 +3,18 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resources :users, only: [:new, :create, :show]
   resource :profile, only: [:show, :edit, :update, :destroy]
-  resources :posts
+  resources :posts do
+    member do
+      post :claim
+    end
+  end
   resources :private_conversations, only: [:index, :create, :show] do
-    resources :messages, only: [:create]
+    resources :messages, only: [:create] do
+      member do
+        post :accept_claim
+        post :reject_claim
+      end
+    end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

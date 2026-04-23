@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_16_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_23_151237) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -42,9 +42,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_16_100000) do
   create_table "messages", force: :cascade do |t|
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.integer "post_id"
     t.integer "private_conversation_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["post_id"], name: "index_messages_on_post_id"
     t.index ["private_conversation_id"], name: "index_messages_on_private_conversation_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
@@ -55,6 +57,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_16_100000) do
     t.datetime "created_at", null: false
     t.text "description", null: false
     t.string "location", null: false
+    t.string "status", default: "available", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
@@ -97,6 +100,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_16_100000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "messages", "posts"
   add_foreign_key "messages", "private_conversations"
   add_foreign_key "messages", "users"
   add_foreign_key "posts", "users"
