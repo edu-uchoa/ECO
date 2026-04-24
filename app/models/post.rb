@@ -2,6 +2,7 @@ class Post < ApplicationRecord
   belongs_to :user
   has_many_attached :images
   has_many :claim_messages, class_name: "Message", dependent: :nullify
+  has_one :review, dependent: :destroy
 
   STATUSES = %w[available taken].freeze
 

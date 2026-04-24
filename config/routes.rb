@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     member do
       post :claim
     end
+    resource :review, only: [:create, :destroy]
   end
   resources :private_conversations, only: [:index, :create, :show] do
     resources :messages, only: [:create] do

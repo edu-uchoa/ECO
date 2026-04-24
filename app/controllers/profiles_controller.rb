@@ -2,6 +2,8 @@ class ProfilesController < ApplicationController
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   def show
+    @available_posts = @user.posts.where(status: "available").recent
+    @taken_posts = @user.posts.where(status: "taken").recent
   end
 
   def edit

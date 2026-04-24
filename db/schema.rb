@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_23_151237) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_174613) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -75,6 +75,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_151237) do
     t.index ["sender_id"], name: "index_private_conversations_on_sender_id"
   end
 
+  create_table "reviews", force: :cascade do |t|
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.integer "post_id", null: false
+    t.integer "rating"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["post_id"], name: "index_reviews_on_post_id"
+    t.index ["user_id"], name: "index_reviews_on_user_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -106,5 +117,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_151237) do
   add_foreign_key "posts", "users"
   add_foreign_key "private_conversations", "users", column: "receiver_id"
   add_foreign_key "private_conversations", "users", column: "sender_id"
+  add_foreign_key "reviews", "posts"
+  add_foreign_key "reviews", "users"
   add_foreign_key "sessions", "users"
 end
