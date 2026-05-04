@@ -22,6 +22,12 @@ gem "jbuilder"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
 
+# OpenAI API client
+gem "ruby-openai", "~> 7.0"
+
+# Vector similarity search (supports SQLite via sqlite-vec)
+gem "neighbor"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

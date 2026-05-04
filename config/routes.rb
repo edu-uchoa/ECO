@@ -30,4 +30,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
     root "pages#home"
     get "dashboard", to: "pages#dashboard"
+    get "mapa", to: "pages#map", as: :map
+    post "chatbot/ask", to: "chatbot#ask", as: :chatbot_ask
 end

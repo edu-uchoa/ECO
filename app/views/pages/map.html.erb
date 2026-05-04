@@ -1,0 +1,75 @@
+<%= content_for :head do %>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold">🗺️ Mapa de Doações</h1>
+      <p class="text-gray-600 mt-1">Itens disponíveis próximos a você</p>
+    </div>
+    <span class="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
+      <%= @posts.count %> <%= @posts.count == 1 ? "item" : "itens" %> disponíveis
+    </span>
+  </div>
+
+  <div id="map" class="rounded-2xl border border-gray-200 shadow-sm w-full" style="height: 540px; z-index: 1;"></div>
+
+  <p class="text-xs text-gray-400 text-center">
+    As localizações são geocodificadas com base no texto informado pelo doador. Pode haver pequenas imprecisões.
+  </p>
+</div>
+
+<script>
+  var posts = <%= raw @posts_json %>;
+  var map = L.map('map').setView([-15.78, -47.93], 5); // Brasil centralizado
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19
+  }).addTo(map);
+
+  var geocodeCache = {};
+  var geocoded = 0;
+
+  function geocodeAndPlot(post) {
+    var location = post.location;
+    if (geocodeCache[location]) {
+      plotMarker(post, geocodeCache[location].lat, geocodeCache[location].lon);
+      return;
+    }
+
+    fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(location) + '&limit=1', {
+      headers: { 'Accept-Language': 'pt-BR', 'User-Agent': 'ECO-DoacoesApp/1.0' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.length > 0) {
+        geocodeCache[location] = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+        plotMarker(post, geocodeCache[location].lat, geocodeCache[location].lon);
+      }
+    })
+    .catch(function() {});
+  }
+
+  function plotMarker(post, lat, lon) {
+    var marker = L.marker([lat, lon]).addTo(map);
+    marker.bindPopup(
+      '<div style="min-width:200px">' +
+      '<p class="font-bold text-base">' + post.title + '</p>' +
+      '<p class="text-xs text-gray-500 mt-1">👤 ' + post.user + '</p>' +
+      '<p class="text-xs text-gray-500">📦 ' + post.category + ' · ' + post.condition + '</p>' +
+      '<p class="text-xs text-gray-500">📍 ' + post.location + '</p>' +
+      '<a href="' + post.url + '" style="display:inline-block;margin-top:8px;padding:4px 12px;background:#16a34a;color:white;border-radius:8px;font-size:12px;text-decoration:none;">Ver item</a>' +
+      '</div>'
+    );
+    geocoded++;
+    if (geocoded === 1) map.setView([lat, lon], 10);
+  }
+
+  // Geocode with delay to respect Nominatim rate limit (1 req/sec)
+  posts.forEach(function(post, i) {
+    setTimeout(function() { geocodeAndPlot(post); }, i * 1100);
+  });
+</script>
