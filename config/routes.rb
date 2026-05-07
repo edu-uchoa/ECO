@@ -32,4 +32,6 @@ Rails.application.routes.draw do
     get "dashboard", to: "pages#dashboard"
     get "mapa", to: "pages#map", as: :map
     post "chatbot/ask", to: "chatbot#ask", as: :chatbot_ask
+
+  resources :collection_points, only: [:index, :create]
 end

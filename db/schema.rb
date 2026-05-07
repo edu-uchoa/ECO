@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_04_201239) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_04_214415) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -37,6 +37,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_201239) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "collection_points", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "latitude"
+    t.decimal "longitude"
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_collection_points_on_user_id"
   end
 
   create_table "knowledge_chunks", force: :cascade do |t|
@@ -121,6 +131,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_201239) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "collection_points", "users"
   add_foreign_key "messages", "posts"
   add_foreign_key "messages", "private_conversations"
   add_foreign_key "messages", "users"

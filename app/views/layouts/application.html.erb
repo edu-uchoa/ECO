@@ -11,6 +11,9 @@
 
     <%= yield :head %>
 
+    <link rel="stylesheet" href="/leaflet/leaflet.css" />
+    <script src="/leaflet/leaflet.js"></script>
+
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
@@ -44,12 +47,12 @@
                   <span class="text-sm font-medium">Chat</span>
                 <% end %>
 
-                <%= link_to map_path, class: "text-gray-600 hover:text-gray-800 transition" do %>
+                <%= link_to map_path, class: "text-gray-600 hover:text-gray-800 transition", data: { turbo: false } do %>
                   <span class="text-sm font-medium">🗺️ Mapa</span>
                 <% end %>
               </div>
             <% else %>
-              <%= link_to map_path, class: "hidden md:inline text-gray-600 hover:text-gray-800 transition" do %>
+              <%= link_to map_path, class: "hidden md:inline text-gray-600 hover:text-gray-800 transition", data: { turbo: false } do %>
                 <span class="text-sm font-medium">🗺️ Mapa</span>
               <% end %>
             <% end %>
@@ -83,6 +86,11 @@
               <span class="text-sm font-medium">Chat</span>
               <span class="text-xs">Chat</span>
             <% end %>
+          <% end %>
+
+          <%= link_to map_path, class: "flex flex-col items-center gap-1 text-gray-600 hover:text-gray-800 transition", data: { turbo: false } do %>
+            <span class="text-sm font-medium">🗺️</span>
+            <span class="text-xs">Mapa</span>
           <% end %>
         </div>
       </div>
