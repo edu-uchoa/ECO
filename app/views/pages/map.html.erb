@@ -1,58 +1,155 @@
 <div
-  class="space-y-4"
+  class="space-y-6"
   data-controller="map"
   data-map-can-create-value="<%= authenticated? && Current.user.profile_complete? %>"
   data-map-is-auth-value="<%= authenticated? %>"
+  data-map-login-url-value="<%= new_session_path %>"
   data-map-points-url-value="<%= collection_points_path(format: :json) %>"
   data-map-create-url-value="<%= collection_points_path %>"
 >
-  <div class="flex items-center justify-between flex-wrap gap-3">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
     <div>
-      <h1 class="text-3xl font-bold">🗺️ Mapa de Pontos de Coleta</h1>
-      <p class="text-gray-500 text-sm mt-1">Visualize e cadastre pontos de coleta de doações na sua região.</p>
+      <h1 class="text-3xl font-bold">Pontos de Coleta</h1>
+      <p class="text-gray-500 text-sm mt-1">Apenas pins aprovados aparecem publicamente. Novas submissões entram em moderação.</p>
     </div>
-    <% if authenticated? && Current.user.profile_complete? %>
-      <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-        <span class="text-green-600 text-sm">✅ Clique no mapa para adicionar um ponto</span>
-      </div>
-    <% elsif authenticated? %>
-      <div class="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
-        <span class="text-yellow-700 text-sm">⚠️ Complete seu perfil para adicionar pontos</span>
-        <%= link_to "Completar perfil →", edit_profile_path, class: "text-sm font-semibold text-yellow-700 underline ml-1" %>
-      </div>
-    <% else %>
-      <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-        <span class="text-blue-700 text-sm">ℹ️ Faça login para adicionar pontos</span>
-        <%= link_to "Entrar →", new_session_path, class: "text-sm font-semibold text-blue-700 underline ml-1" %>
-      </div>
+
+    <% if authenticated? && Current.user.moderator? %>
+      <%= link_to "Moderação", moderation_collection_points_path, class: "inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50" %>
     <% end %>
   </div>
 
-  <div
-    id="map"
-    data-map-target="canvas"
-    style="height:540px;width:100%;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.1);background:#e8e8e8;"
-  ></div>
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <section class="xl:col-span-2 space-y-3">
+      <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div class="flex flex-col md:flex-row gap-2 md:items-center">
+          <input
+            type="text"
+            data-map-target="searchInput"
+            placeholder="Pesquisar endereço (ex: Asa Norte, Brasília)"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+          <button
+            type="button"
+            data-action="click->map#searchAddress"
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+          >
+            Buscar endereço
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">Você também pode clicar no mapa para definir a localização exata do pin.</p>
+      </div>
 
-  <div class="flex flex-wrap gap-4 text-sm text-gray-500">
-    <div class="flex items-center gap-2">
-      <span class="inline-block w-3 h-3 rounded-full bg-green-600"></span>
-      Ponto de coleta cadastrado
-    </div>
-  </div>
-</div>
+      <div
+        id="map"
+        data-map-target="canvas"
+        style="height:620px;width:100%;position:relative;z-index:0;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.1);background:#e8e8e8;"
+      ></div>
+    </section>
 
-<div id="map-modal" data-map-target="modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;">
-  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.5);" data-action="click->map#closeModal"></div>
-  <div style="position:relative;background:white;border-radius:16px;padding:24px;width:100%;max-width:440px;margin:0 16px;z-index:10;">
-    <h2 style="font-size:18px;font-weight:700;margin:0 0 16px;">📍 Novo Ponto de Coleta</h2>
-    <input id="modal-point-name" type="text" placeholder="Nome do ponto (ex: Ponto Centro)"
-      data-map-target="nameInput"
-      style="width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:14px;box-sizing:border-box;" maxlength="100" />
-    <p id="modal-name-error" data-map-target="nameError" style="display:none;color:red;font-size:12px;margin-top:4px;"></p>
-    <div style="display:flex;gap:12px;margin-top:16px;">
-      <button data-action="click->map#closeModal" style="flex:1;border:1px solid #d1d5db;background:white;border-radius:8px;padding:8px;font-size:14px;cursor:pointer;">Cancelar</button>
-      <button id="modal-submit" data-map-target="submitButton" data-action="click->map#submitPoint" style="flex:1;background:#16a34a;color:white;border:none;border-radius:8px;padding:8px;font-size:14px;cursor:pointer;">Salvar</button>
-    </div>
+    <section class="space-y-4">
+      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 class="text-lg font-semibold">Adicionar ponto de coleta</h2>
+        <p class="text-xs text-gray-500 mt-1">Preencha os dados obrigatórios e envie para análise.</p>
+
+        <div data-map-target="errorBox" class="hidden mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+        <div data-map-target="successBox" class="hidden mt-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"></div>
+
+        <form data-map-target="form" data-action="submit->map#submitPoint" class="mt-4 space-y-4" enctype="multipart/form-data">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nome do ponto *</label>
+            <input data-map-target="titleInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="120" required />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Endereço completo *</label>
+            <input data-map-target="addressInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="255" required />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Latitude *</label>
+              <input data-map-target="latitudeInput" type="text" readonly class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Longitude *</label>
+              <input data-map-target="longitudeInput" type="text" readonly class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Horário de funcionamento</label>
+            <input data-map-target="openingHoursInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="120" placeholder="Ex: Seg-Sex 08:00 às 18:00" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descrição (opcional)</label>
+            <textarea data-map-target="descriptionInput" rows="3" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="1000"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Categorias *</label>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <% ["plástico", "vidro", "papel", "metal", "eletrônico", "óleo", "roupas", "pilhas", "baterias", "outro"].each do |category| %>
+                <label class="inline-flex items-center gap-2 rounded border border-gray-200 px-2 py-1">
+                  <input type="checkbox" value="<%= category %>" data-map-target="categoryCheckbox" />
+                  <span><%= category.capitalize %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Imagens (opcional)</label>
+            <input data-map-target="imagesInput" type="file" multiple accept="image/*" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+          </div>
+
+          <div class="grid grid-cols-1 gap-3">
+            <input data-map-target="contactNameInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (nome)" maxlength="100" />
+            <input data-map-target="contactPhoneInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (telefone)" maxlength="40" />
+            <input data-map-target="contactEmailInput" type="email" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (email)" maxlength="100" />
+          </div>
+
+          <button
+            data-map-target="submitButton"
+            type="submit"
+            class="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500"
+          >
+            Enviar para moderação
+          </button>
+        </form>
+      </div>
+    </section>
   </div>
+
+  <% if authenticated? && @my_collection_points.present? %>
+    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-semibold">📌 Suas submissões recentes</h2>
+      <p class="text-xs text-gray-500 mt-1">Acompanhe o status: em análise, aprovado ou rejeitado.</p>
+
+      <div class="mt-4 space-y-3">
+        <% @my_collection_points.each do |point| %>
+          <div class="rounded-lg border border-gray-100 p-3">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="text-sm font-semibold text-gray-800"><%= point.title %></p>
+                <p class="text-xs text-gray-500"><%= point.address %></p>
+              </div>
+
+              <% if point.pending? %>
+                <span class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">Seu item está em análise</span>
+              <% elsif point.approved? %>
+                <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">Seu item foi aprovado</span>
+              <% else %>
+                <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">Seu item foi rejeitado</span>
+              <% end %>
+            </div>
+
+            <% if point.rejected? && point.rejection_reason.present? %>
+              <p class="mt-2 text-xs text-red-700">Motivo da rejeição: <%= point.rejection_reason %></p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
 </div>

@@ -1,13 +1,16 @@
 <div class="w-full">
     <div class="py-8">
         <div class="max-w-6xl mx-auto px-6 py-12 text-center">
-            <h2 class="text-4xl font-extrabold mb-4 text-gray-900">Bem-vindo ao ProjetoFinal</h2>
+                        <% if !authenticated? %>
+                            <h2 class="text-4xl font-extrabold mb-4 text-gray-900">Bem Vindo ao Projeto ECO</h2>
+                        <% else %>
+                            <h2 class="text-4xl font-extrabold mb-4 text-gray-900">Bem-vindo ao ProjetoFinal</h2>
+                        <% end %>
             <p class="text-lg text-gray-600 mb-8">Explore itens disponíveis para doação. Cadastre-se para compartilhar seus itens.</p>
 
             <% if !authenticated? %>
               <div class="flex justify-center gap-4">
                   <%= link_to "Começar", new_user_path, class: "px-6 py-3 rounded-md bg-blue-600 text-white hover:bg-blue-500 font-semibold" %>
-                  <%= link_to "Saiba mais", '#posts-section', class: "px-6 py-3 rounded-md border border-gray-200 text-gray-700 hover:bg-gray-100 font-semibold" %>
               </div>
             <% end %>
         </div>

@@ -15,10 +15,9 @@ module Chatbot
       Rails.logger.info("[Chatbot::Indexer] Starting indexing...")
       index_static_content
       index_posts
+      index_collection_points
       Rails.logger.info("[Chatbot::Indexer] Done. Total chunks: #{KnowledgeChunk.count}")
     end
-
-    private
 
     # ---------- Static site content ----------
 
@@ -40,7 +39,9 @@ module Chatbot
             O dono do post pode remover avaliações indesejadas.
             No perfil de cada usuário é possível ver os itens disponíveis e os já doados separadamente.
             O chat permite troca de mensagens privadas entre usuários.
-            Na aba Mapa é possível visualizar a localização dos itens disponíveis.
+            Na aba Mapa é possível visualizar pontos de coleta aprovados pela moderação.
+            Novos pontos do mapa enviados por usuários comuns entram como pendentes até revisão.
+            Moderadores podem aprovar ou rejeitar pontos no painel de moderação.
           TEXT
         },
         {
@@ -55,6 +56,19 @@ module Chatbot
             Como ver meus posts: acesse "Meu Perfil" na barra de navegação.
             Como avaliar um item recebido: após a doação ser aceita, acesse a página do item e deixe sua avaliação.
             Como ver o mapa de itens: clique na aba "Mapa" na barra de navegação.
+            Como enviar um ponto no mapa: abra a aba "Mapa", preencha o formulário de ponto de coleta e envie para análise.
+            Como moderar pontos: usuários com papel de moderador acessam a área de moderação para aprovar ou rejeitar pontos pendentes.
+          TEXT
+        },
+        {
+          source: "moderation",
+          source_id: 0,
+          content: <<~TEXT
+            O sistema de pontos no mapa usa moderação.
+            Usuários comuns podem criar pontos, mas eles entram com status pendente.
+            Somente pontos aprovados ficam visíveis publicamente no mapa.
+            Moderadores podem aprovar ou rejeitar pontos e registrar motivo da decisão.
+            A plataforma mantém histórico de moderação para auditoria.
           TEXT
         }
       ]
@@ -68,10 +82,31 @@ module Chatbot
 
     def index_posts
       Post.available.includes(:user).find_each do |post|
-        text = build_post_text(post)
-        upsert_chunks(text, "post", post.id, { title: post.title })
+        index_post(post)
       end
     end
+
+    def index_post(post)
+      text = build_post_text(post)
+      upsert_chunks(text, "post", post.id, { title: post.title })
+    end
+
+    def index_collection_points
+      CollectionPoint.publicly_visible.includes(:user).find_each do |point|
+        index_collection_point(point)
+      end
+    end
+
+    def index_collection_point(point)
+      text = build_collection_point_text(point)
+      upsert_chunks(text, "collection_point", point.id, { title: point.title })
+    end
+
+    def remove_source(source, source_id)
+      KnowledgeChunk.where(source: source, source_id: source_id).delete_all
+    end
+
+    private
 
     def build_post_text(post)
       <<~TEXT
@@ -82,6 +117,19 @@ module Chatbot
         Doador: #{post.user.name}
         Descrição: #{post.description}
         Link: /posts/#{post.id}
+      TEXT
+    end
+
+    def build_collection_point_text(point)
+      <<~TEXT
+        Ponto de coleta aprovado no mapa: #{point.title}
+        Endereço: #{point.address}
+        Categorias: #{Array(point.categories).join(", ")}
+        Horário: #{point.opening_hours.presence || "Não informado"}
+        Contato: #{point.contact_name.presence || "Não informado"}
+        Telefone: #{point.contact_phone.presence || "Não informado"}
+        Email: #{point.contact_email.presence || "Não informado"}
+        Descrição: #{point.description.presence || "Não informada"}
       TEXT
     end
 

@@ -10,5 +10,8 @@ class PagesController < ApplicationController
   end
 
   def map
+    return unless authenticated?
+
+    @my_collection_points = Current.user.collection_points.order(created_at: :desc).limit(10)
   end
 end

@@ -1,8 +1,18 @@
 class User < ApplicationRecord
   has_secure_password
+
+  attribute :role, :string, default: "common"
+
+  enum :role, {
+    common: "common",
+    moderator: "moderator"
+  }, default: :common
+
   has_many :sessions, dependent: :destroy
   has_many :posts, dependent: :destroy
   has_many :collection_points, dependent: :destroy
+  has_many :approved_collection_points, class_name: "CollectionPoint", foreign_key: :approved_by, dependent: :nullify
+  has_many :moderation_logs, foreign_key: :moderator_id, dependent: :destroy
 
   has_many :sent_conversations, class_name: "PrivateConversation", foreign_key: :sender_id, dependent: :destroy
   has_many :received_conversations, class_name: "PrivateConversation", foreign_key: :receiver_id, dependent: :destroy
@@ -15,6 +25,7 @@ class User < ApplicationRecord
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   validates :name, presence: true, uniqueness: true
+  validates :role, presence: true, inclusion: { in: roles.keys }
   validates :email_address,
             presence: true,
             uniqueness: { case_sensitive: false },

@@ -1,20 +1,38 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["canvas", "modal", "nameInput", "nameError", "submitButton"]
+  static targets = [
+    "canvas",
+    "form",
+    "searchInput",
+    "titleInput",
+    "addressInput",
+    "latitudeInput",
+    "longitudeInput",
+    "openingHoursInput",
+    "descriptionInput",
+    "contactNameInput",
+    "contactPhoneInput",
+    "contactEmailInput",
+    "imagesInput",
+    "categoryCheckbox",
+    "submitButton",
+    "errorBox",
+    "successBox"
+  ]
 
   static values = {
     canCreate: Boolean,
     isAuth: Boolean,
+    loginUrl: String,
     pointsUrl: String,
     createUrl: String
   }
 
   connect() {
-    this.pendingLat = null
-    this.pendingLng = null
     this.map = null
     this.markerIcon = null
+    this.selectionMarker = null
 
     this.initMap()
   }
@@ -23,48 +41,106 @@ export default class extends Controller {
     this.destroyMap()
   }
 
-  closeModal() {
-    if (this.hasModalTarget) {
-      this.modalTarget.style.display = "none"
+  async submitPoint(event) {
+    event.preventDefault()
+
+    if (!this.isAuthValue) {
+      const loginUrl = this.loginUrlValue || "/session/new"
+      window.location.assign(loginUrl)
+      return
     }
-  }
 
-  async submitPoint() {
-    const name = (this.nameInputTarget?.value || "").trim()
+    if (!this.canCreateValue) {
+      this.showError("Complete seu perfil antes de enviar um ponto de coleta.")
+      return
+    }
 
-    if (name.length < 3) {
-      this.showError("Min. 3 caracteres.")
+    const title = this.titleInputTarget.value.trim()
+    const address = this.addressInputTarget.value.trim()
+    const latitude = this.latitudeInputTarget.value.trim()
+    const longitude = this.longitudeInputTarget.value.trim()
+    const categories = this.selectedCategories()
+
+    if (title.length < 3) {
+      this.showError("O nome do ponto precisa ter ao menos 3 caracteres.")
+      return
+    }
+
+    if (address.length < 5) {
+      this.showError("Informe um endereço completo.")
+      return
+    }
+
+    if (!latitude || !longitude) {
+      this.showError("Selecione a localização clicando no mapa ou usando a busca de endereço.")
+      return
+    }
+
+    if (categories.length === 0) {
+      this.showError("Selecione pelo menos uma categoria de item aceito.")
       return
     }
 
     this.showError("")
+    this.showSuccess("")
 
     if (!this.submitButtonTarget) return
 
     this.submitButtonTarget.disabled = true
-    this.submitButtonTarget.textContent = "Salvando..."
+    this.submitButtonTarget.textContent = "Enviando..."
 
     try {
+      const formData = new FormData()
+
+      formData.append("collection_point[title]", title)
+      formData.append("collection_point[address]", address)
+      formData.append("collection_point[latitude]", latitude)
+      formData.append("collection_point[longitude]", longitude)
+      formData.append("collection_point[opening_hours]", this.openingHoursInputTarget.value.trim())
+      formData.append("collection_point[description]", this.descriptionInputTarget.value.trim())
+      formData.append("collection_point[contact_name]", this.contactNameInputTarget.value.trim())
+      formData.append("collection_point[contact_phone]", this.contactPhoneInputTarget.value.trim())
+      formData.append("collection_point[contact_email]", this.contactEmailInputTarget.value.trim())
+
+      categories.forEach((category) => {
+        formData.append("collection_point[categories][]", category)
+      })
+
+      Array.from(this.imagesInputTarget.files || []).forEach((file) => {
+        formData.append("collection_point[images][]", file)
+      })
+
       const response = await fetch(this.createUrlValue, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "X-CSRF-Token": this.csrfToken()
         },
-        body: JSON.stringify({
-          collection_point: {
-            name,
-            latitude: this.pendingLat,
-            longitude: this.pendingLng
-          }
-        })
+        body: formData
       })
 
-      const data = await response.json()
+      if (response.redirected) {
+        window.location.assign(response.url)
+        return
+      }
+
+      if (response.status === 401) {
+        const loginUrl = this.loginUrlValue || "/session/new"
+        window.location.assign(loginUrl)
+        return
+      }
+
+      const data = await response.json().catch(() => ({}))
 
       if (response.status === 201) {
-        this.addMarker(data)
-        this.closeModal()
+        this.showSuccess(data?.message || "Ponto enviado para moderação com sucesso.")
+        this.formTarget.reset()
+        this.latitudeInputTarget.value = ""
+        this.longitudeInputTarget.value = ""
+
+        if (this.selectionMarker) {
+          this.map.removeLayer(this.selectionMarker)
+          this.selectionMarker = null
+        }
       } else {
         this.showError(data?.error || "Erro.")
       }
@@ -72,7 +148,7 @@ export default class extends Controller {
       this.showError("Erro de conexão.")
     } finally {
       this.submitButtonTarget.disabled = false
-      this.submitButtonTarget.textContent = "Salvar"
+      this.submitButtonTarget.textContent = "Enviar para moderação"
     }
   }
 
@@ -93,9 +169,15 @@ export default class extends Controller {
 
     this.markerIcon = window.L.divIcon({
       className: "",
-      html: '<div style="width:12px;height:12px;background:#16a34a;border:2px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.4);"></div>',
-      iconSize: [12, 12],
-      iconAnchor: [6, 6]
+      html: `
+        <div style="position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center;">
+          <div style="position:absolute;width:34px;height:34px;border-radius:50%;background:rgba(22,163,74,0.22);border:2px solid rgba(22,163,74,0.45);"></div>
+          <div style="position:relative;width:14px;height:14px;background:#16a34a;border:3px solid #ffffff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.45);"></div>
+        </div>
+      `,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+      popupAnchor: [0, -16]
     })
 
     this.map.on("click", (event) => this.handleMapClick(event))
@@ -133,46 +215,126 @@ export default class extends Controller {
   addMarker(point) {
     if (!this.map || !window.L) return
 
+    const title = this.escapeHtml(point.title || "Ponto de coleta")
+    const address = this.escapeHtml(point.address || "")
+    const categories = Array.isArray(point.categories) ? point.categories.join(", ") : ""
+    const firstImage = Array.isArray(point.image_urls) && point.image_urls.length > 0 ? point.image_urls[0] : null
+    const imageHtml = firstImage
+      ? `<img src="${this.escapeAttribute(firstImage)}" alt="Imagem do ponto" style="display:block;width:100%;max-width:220px;height:120px;object-fit:cover;border-radius:8px;margin:6px 0;" loading="lazy" />`
+      : ""
+
+    const popup = [
+      `<b>${title}</b>`,
+      imageHtml,
+      address ? `<div style="margin-top:4px;">${this.escapeHtml(address)}</div>` : "",
+      point.opening_hours ? `<small>Horário: ${this.escapeHtml(point.opening_hours)}</small>` : "",
+      categories ? `<small>Categorias: ${this.escapeHtml(categories)}</small>` : "",
+      point.user ? `<small>Enviado por: ${this.escapeHtml(point.user)}</small>` : ""
+    ].filter(Boolean).join("<br>")
+
     window.L.marker([point.latitude, point.longitude], { icon: this.markerIcon })
       .addTo(this.map)
-      .bindPopup(`<b>${point.name}</b><br><small>${point.user}</small>`)
+      .bindPopup(popup)
   }
 
   handleMapClick(event) {
-    if (!this.isAuthValue) {
-      window.alert("Faça login para adicionar pontos.")
+    this.setSelectedLocation(event.latlng.lat, event.latlng.lng)
+  }
+
+  async searchAddress() {
+    const query = this.searchInputTarget.value.trim()
+
+    if (!query) {
+      this.showError("Digite um endereço para pesquisar.")
       return
-    }
-
-    if (!this.canCreateValue) {
-      window.alert("Complete seu perfil para adicionar pontos.")
-      return
-    }
-
-    this.pendingLat = event.latlng.lat
-    this.pendingLng = event.latlng.lng
-
-    if (this.hasNameInputTarget) {
-      this.nameInputTarget.value = ""
-      this.nameInputTarget.focus()
     }
 
     this.showError("")
 
-    if (this.hasModalTarget) {
-      this.modalTarget.style.display = "flex"
+    try {
+      const params = new URLSearchParams({
+        q: query,
+        format: "json",
+        limit: "1"
+      })
+
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+        headers: {
+          Accept: "application/json"
+        }
+      })
+
+      const results = await response.json()
+
+      if (!Array.isArray(results) || results.length === 0) {
+        this.showError("Endereço não encontrado. Tente um termo mais completo.")
+        return
+      }
+
+      const place = results[0]
+      const lat = Number(place.lat)
+      const lng = Number(place.lon)
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        this.showError("Não foi possível localizar esse endereço no mapa.")
+        return
+      }
+
+      this.map.setView([lat, lng], 15)
+      this.setSelectedLocation(lat, lng)
+
+      if (!this.addressInputTarget.value.trim()) {
+        this.addressInputTarget.value = place.display_name || query
+      }
+    } catch (_error) {
+      this.showError("Falha ao pesquisar endereço. Tente novamente em instantes.")
     }
   }
 
+  setSelectedLocation(latitude, longitude) {
+    if (!this.map || !window.L) return
+
+    const lat = Number(latitude)
+    const lng = Number(longitude)
+
+    this.latitudeInputTarget.value = lat.toFixed(6)
+    this.longitudeInputTarget.value = lng.toFixed(6)
+
+    if (this.selectionMarker) {
+      this.map.removeLayer(this.selectionMarker)
+    }
+
+    this.selectionMarker = window.L.marker([lat, lng]).addTo(this.map)
+    this.selectionMarker.bindPopup("Localização selecionada para submissão").openPopup()
+  }
+
+  selectedCategories() {
+    return this.categoryCheckboxTargets
+      .filter((checkbox) => checkbox.checked)
+      .map((checkbox) => checkbox.value)
+  }
+
   showError(message) {
-    if (!this.hasNameErrorTarget) return
+    if (!this.hasErrorBoxTarget) return
 
     if (message) {
-      this.nameErrorTarget.textContent = message
-      this.nameErrorTarget.style.display = "block"
+      this.errorBoxTarget.textContent = message
+      this.errorBoxTarget.classList.remove("hidden")
     } else {
-      this.nameErrorTarget.textContent = ""
-      this.nameErrorTarget.style.display = "none"
+      this.errorBoxTarget.textContent = ""
+      this.errorBoxTarget.classList.add("hidden")
+    }
+  }
+
+  showSuccess(message) {
+    if (!this.hasSuccessBoxTarget) return
+
+    if (message) {
+      this.successBoxTarget.textContent = message
+      this.successBoxTarget.classList.remove("hidden")
+    } else {
+      this.successBoxTarget.textContent = ""
+      this.successBoxTarget.classList.add("hidden")
     }
   }
 
@@ -183,5 +345,22 @@ export default class extends Controller {
   csrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]')
     return meta ? meta.getAttribute("content") : ""
+  }
+
+  escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;")
+  }
+
+  escapeAttribute(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
   }
 }

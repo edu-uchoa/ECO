@@ -15,16 +15,30 @@ namespace :chatbot do
   desc "Re-index only available posts"
   task index_posts: :environment do
     KnowledgeChunk.where(source: "post").destroy_all
-    embedder = Chatbot::Embedder.new
     indexer  = Chatbot::Indexer.new
 
-    Post.available.includes(:user).find_each do |post|
-      indexer.send(:upsert_chunks,
-        indexer.send(:build_post_text, post),
-        "post", post.id
-      )
-      print "."
+    indexer.index_posts
+    puts "Posts indexed!"
+  end
+
+  desc "Re-index only approved collection points"
+  task index_collection_points: :environment do
+    KnowledgeChunk.where(source: "collection_point").destroy_all
+    indexer = Chatbot::Indexer.new
+
+    indexer.index_collection_points
+    puts "Collection points indexed!"
+  end
+
+  desc "Show chatbot index status by source"
+  task status: :environment do
+    puts "Knowledge chunks by source:"
+    counts = KnowledgeChunk.group(:source).count
+    counts.each do |source, count|
+      latest = KnowledgeChunk.where(source: source).maximum(:updated_at)
+      puts "- #{source}: #{count} chunks (última atualização: #{latest || 'n/a'})"
     end
-    puts "\nPosts indexed!"
+
+    puts "Total: #{KnowledgeChunk.count}"
   end
 end

@@ -41,7 +41,13 @@ class Post < ApplicationRecord
 
   validate :validate_images
 
+  after_commit :sync_chatbot_knowledge, on: [:create, :update, :destroy]
+
   private
+
+  def sync_chatbot_knowledge
+    Chatbot::SyncSourceJob.perform_later("post", id)
+  end
 
   def validate_images
     return unless images.attached?

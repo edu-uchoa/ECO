@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_04_214415) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_07_123000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -40,12 +40,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_214415) do
   end
 
   create_table "collection_points", force: :cascade do |t|
+    t.string "address"
+    t.datetime "approved_at"
+    t.integer "approved_by"
+    t.text "categories", default: "[]", null: false
+    t.string "contact_email"
+    t.string "contact_name"
+    t.string "contact_phone"
     t.datetime "created_at", null: false
+    t.text "description"
     t.decimal "latitude"
     t.decimal "longitude"
     t.string "name"
+    t.string "opening_hours"
+    t.text "rejection_reason"
+    t.string "status", default: "pending", null: false
+    t.string "title"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["approved_by"], name: "index_collection_points_on_approved_by"
+    t.index ["status"], name: "index_collection_points_on_status"
     t.index ["user_id"], name: "index_collection_points_on_user_id"
   end
 
@@ -69,6 +83,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_214415) do
     t.index ["post_id"], name: "index_messages_on_post_id"
     t.index ["private_conversation_id"], name: "index_messages_on_private_conversation_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
+  create_table "moderation_logs", force: :cascade do |t|
+    t.string "action_type", null: false
+    t.integer "collection_point_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "moderator_id", null: false
+    t.string "new_status"
+    t.string "previous_status"
+    t.text "reason"
+    t.datetime "updated_at", null: false
+    t.index ["action_type"], name: "index_moderation_logs_on_action_type"
+    t.index ["collection_point_id"], name: "index_moderation_logs_on_collection_point_id"
+    t.index ["created_at"], name: "index_moderation_logs_on_created_at"
+    t.index ["moderator_id"], name: "index_moderation_logs_on_moderator_id"
   end
 
   create_table "posts", force: :cascade do |t|
@@ -122,19 +151,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_214415) do
     t.string "email_address", null: false
     t.string "name", null: false
     t.string "password_digest", null: false
+    t.string "role", default: "common", null: false
     t.integer "telefone"
     t.string "uf"
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["name"], name: "index_users_on_name", unique: true
+    t.index ["role"], name: "index_users_on_role"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "collection_points", "users"
+  add_foreign_key "collection_points", "users", column: "approved_by"
   add_foreign_key "messages", "posts"
   add_foreign_key "messages", "private_conversations"
   add_foreign_key "messages", "users"
+  add_foreign_key "moderation_logs", "collection_points"
+  add_foreign_key "moderation_logs", "users", column: "moderator_id"
   add_foreign_key "posts", "users"
   add_foreign_key "private_conversations", "users", column: "receiver_id"
   add_foreign_key "private_conversations", "users", column: "sender_id"

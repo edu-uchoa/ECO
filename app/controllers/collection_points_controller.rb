@@ -1,9 +1,8 @@
 class CollectionPointsController < ApplicationController
   allow_unauthenticated_access only: [:index]
-  skip_forgery_protection only: [:create]
 
   def index
-    points = CollectionPoint.includes(:user).all
+    points = CollectionPoint.publicly_visible.includes(:user, images_attachments: :blob)
     render json: points.map(&:as_map_json)
   end
 
@@ -14,9 +13,13 @@ class CollectionPointsController < ApplicationController
     end
 
     point = Current.user.collection_points.build(collection_point_params)
+    point.status = Current.user.moderator? ? :approved : :pending
 
     if point.save
-      render json: point.as_map_json, status: :created
+      render json: {
+        message: point.pending? ? "Seu item está em análise." : "Item aprovado e publicado com sucesso.",
+        point: point.as_map_json
+      }, status: :created
     else
       render json: { error: point.errors.full_messages.to_sentence }, status: :unprocessable_entity
     end
@@ -25,6 +28,18 @@ class CollectionPointsController < ApplicationController
   private
 
   def collection_point_params
-    params.require(:collection_point).permit(:name, :latitude, :longitude)
+    params.require(:collection_point).permit(
+      :title,
+      :description,
+      :address,
+      :latitude,
+      :longitude,
+      :opening_hours,
+      :contact_name,
+      :contact_phone,
+      :contact_email,
+      categories: [],
+      images: []
+    )
   end
 end

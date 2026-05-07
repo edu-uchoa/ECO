@@ -34,4 +34,15 @@ Rails.application.routes.draw do
     post "chatbot/ask", to: "chatbot#ask", as: :chatbot_ask
 
   resources :collection_points, only: [:index, :create]
+
+  get "moderation", to: "moderation/collection_points#index", as: :moderation_dashboard
+
+  namespace :moderation do
+    resources :collection_points, only: [:index] do
+      member do
+        patch :approve
+        patch :reject
+      end
+    end
+  end
 end
