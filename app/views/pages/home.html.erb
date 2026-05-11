@@ -2,15 +2,15 @@
     <div class="py-8">
         <div class="max-w-6xl mx-auto px-6 py-12 text-center">
                         <% if !authenticated? %>
-                            <h2 class="text-4xl font-extrabold mb-4 text-gray-900">Bem Vindo ao Projeto ECO</h2>
+                            <h2 class="text-4xl font-extrabold mb-4 text-slate-900">Bem Vindo ao Projeto ECO</h2>
                         <% else %>
-                            <h2 class="text-4xl font-extrabold mb-4 text-gray-900">Bem-vindo ao ProjetoFinal</h2>
+                            <h2 class="text-4xl font-extrabold mb-4 text-slate-900">Bem-vindo ao Projeto ECO</h2>
                         <% end %>
-            <p class="text-lg text-gray-600 mb-8">Explore itens disponíveis para doação. Cadastre-se para compartilhar seus itens.</p>
+            <p class="text-lg text-slate-600 mb-8">Explore itens disponíveis para doação. Cadastre-se para compartilhar seus itens.</p>
 
             <% if !authenticated? %>
               <div class="flex justify-center gap-4">
-                  <%= link_to "Começar", new_user_path, class: "px-6 py-3 rounded-md bg-blue-600 text-white hover:bg-blue-500 font-semibold" %>
+                  <%= link_to "Começar", new_user_path, class: "px-6 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 font-semibold transition" %>
               </div>
             <% end %>
         </div>
@@ -18,53 +18,47 @@
         <!-- Posts Section -->
         <div class="max-w-6xl mx-auto px-6 py-12" id="posts-section">
             <div>
-                <h2 class="text-3xl font-bold mb-6">Itens para Doação</h2>
+                <h2 class="text-3xl font-bold mb-6 text-slate-800">Itens para Doação</h2>
             </div>
 
-            <% @posts = Post.recent %>
+            <% @posts = Post.available.recent %>
             <% if @posts.any? %>
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                     <% @posts.each do |post| %>
-                        <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition">
                             <% if post.images.attached? %>
-                                <div class="h-48 overflow-hidden bg-gray-100">
-                                    <%= image_tag post.images.first, alt: post.title, class: "h-full w-full object-cover" %>
+                                <div class="h-48 overflow-hidden bg-slate-100">
+                                    <%= image_tag post.main_image, alt: post.title, class: "h-full w-full object-cover transition group-hover:scale-105 duration-300" %>
                                 </div>
                             <% else %>
-                                <div class="h-48 bg-gray-200 flex items-center justify-center">
-                                    <span class="text-gray-400">Sem imagem</span>
+                                <div class="h-48 bg-slate-100 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 </div>
                             <% end %>
 
                             <div class="p-4 space-y-3">
                                 <div>
-                                    <h3 class="font-bold text-lg text-gray-900"><%= post.title %></h3>
-                                    <%= link_to post.user.name, user_path(post.user), class: "text-sm text-blue-600 hover:text-blue-800 hover:underline" %>
+                                    <h3 class="font-semibold text-slate-900"><%= post.title %></h3>
+                                    <%= link_to post.user.name, user_path(post.user), class: "text-xs text-emerald-600 hover:underline font-medium" %>
                                 </div>
 
-                                <p class="line-clamp-2 text-sm text-gray-700"><%= post.description %></p>
+                                <p class="line-clamp-2 text-xs text-slate-500"><%= post.description %></p>
 
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-                                        <%= post.category %>
-                                    </span>
-                                    <span class="inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                        <%= post.condition %>
-                                    </span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"><%= post.category %></span>
+                                    <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700"><%= post.condition %></span>
                                 </div>
 
-                                <div class="text-sm text-gray-600">
-                                    📍 <%= post.location %>
-                                </div>
+                                <div class="text-xs text-slate-400">📍 <%= post.location %></div>
 
-                                <%= link_to "Ver Detalhes", post_path(post), class: "inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 w-full text-center" %>
+                                <%= link_to "Ver Detalhes", post_path(post), class: "block rounded-xl bg-slate-900 px-4 py-2 text-center text-xs font-semibold text-white hover:bg-slate-700 transition" %>
                             </div>
                         </div>
                     <% end %>
                 </div>
             <% else %>
-                <div class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-                    <p class="text-gray-600">Nenhum item encontrado</p>
+                <div class="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+                    <p class="text-slate-400">Nenhum item encontrado</p>
                 </div>
             <% end %>
         </div>

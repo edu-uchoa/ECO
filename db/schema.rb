@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_07_123000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_11_204431) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -100,12 +100,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_123000) do
     t.index ["moderator_id"], name: "index_moderation_logs_on_moderator_id"
   end
 
+  create_table "post_claims", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "post_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["post_id", "user_id"], name: "index_post_claims_on_post_id_and_user_id", unique: true
+    t.index ["post_id"], name: "index_post_claims_on_post_id"
+    t.index ["user_id"], name: "index_post_claims_on_user_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.string "category", null: false
     t.string "condition", null: false
     t.datetime "created_at", null: false
     t.text "description", null: false
     t.string "location", null: false
+    t.integer "main_image_index", default: 0, null: false
     t.string "status", default: "available", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
@@ -169,6 +181,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_123000) do
   add_foreign_key "messages", "users"
   add_foreign_key "moderation_logs", "collection_points"
   add_foreign_key "moderation_logs", "users", column: "moderator_id"
+  add_foreign_key "post_claims", "posts"
+  add_foreign_key "post_claims", "users"
   add_foreign_key "posts", "users"
   add_foreign_key "private_conversations", "users", column: "receiver_id"
   add_foreign_key "private_conversations", "users", column: "sender_id"

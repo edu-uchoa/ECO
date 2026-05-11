@@ -33,4 +33,16 @@ module ApplicationHelper
 		options[:onclick] = "history.back();"
 		tag.button label, **options
 	end
+
+  # Renders the user avatar image (attached or default SVG).
+  # Options are passed to image_tag (e.g. class:, alt:).
+  def user_avatar_tag(user, **options)
+    options[:alt]   ||= user.name
+    options[:class] ||= "h-10 w-10 rounded-full object-cover"
+    if user.avatar.attached?
+      image_tag url_for(user.avatar), **options
+    else
+      image_tag "default_avatar.svg", **options
+    end
+  end
 end

@@ -1,130 +1,174 @@
-<div class="space-y-8">
+<div class="space-y-8 max-w-4xl mx-auto">
+  <%# ── Botão Voltar ── %>
+  <%= back_link "← Voltar", fallback: posts_path, class: "inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition mb-2" %>
+
   <% if @post.status == "taken" %>
-    <div class="rounded-lg bg-red-50 border border-red-300 px-5 py-4 flex items-center gap-3">
+    <div class="rounded-2xl bg-slate-50 border border-slate-200 px-5 py-4 flex items-center gap-3">
       <span class="text-2xl">📦</span>
       <div>
-        <p class="font-bold text-red-700 text-lg">Item Indisponível</p>
-        <p class="text-red-600 text-sm">Este item já foi doado e não está mais disponível.</p>
+        <p class="font-bold text-slate-700 text-base">Item Indisponível</p>
+        <p class="text-slate-500 text-sm">Este item já foi doado e não está mais disponível.</p>
       </div>
     </div>
   <% end %>
 
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-slate-200 pb-6">
     <div>
-      <div class="flex items-center gap-3">
-        <h1 class="text-3xl font-bold"><%= @post.title %></h1>
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-2xl font-bold tracking-tight text-slate-800"><%= @post.title %></h1>
         <% if @post.status == "available" %>
-          <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-            ✅ Disponível
-          </span>
+          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">✅ Disponível</span>
         <% else %>
-          <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-            🔒 Doado
-          </span>
+          <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">🔒 Doado</span>
         <% end %>
       </div>
-      <p class="text-gray-600 mt-2">Por <%= link_to @post.user.name, user_path(@post.user), class: "text-blue-600 hover:text-blue-800 hover:underline" %></p>
+      <p class="text-sm text-slate-500 mt-2">Por <%= link_to @post.user.name, user_path(@post.user), class: "text-emerald-600 font-medium hover:underline" %></p>
     </div>
-    <div class="flex gap-2">
+    <div class="flex flex-wrap gap-2">
       <% if @post.user == Current.user %>
-        <%= link_to "Editar", edit_post_path(@post), class: "rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-blue-500" %>
-        <%= button_to "Deletar", post_path(@post), method: :delete, data: { confirm: "Tem certeza?" }, class: "rounded-lg bg-red-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-red-500" %>
+        <%= link_to "Editar", edit_post_path(@post), class: "rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition" %>
+        <%= button_to "Remover", post_path(@post), method: :delete,
+            data: { turbo_confirm: "Tem certeza que deseja remover o item \"#{@post.title}\"?." },
+            class: "rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 transition" %>
       <% elsif Current.user && @post.status == "available" %>
-        <%= button_to "Tenho Interesse", claim_post_path(@post), method: :post,
-            class: "rounded-lg bg-green-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-green-500",
+        <%= button_to "💚 Tenho Interesse", claim_post_path(@post), method: :post,
+            class: "rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-500 transition",
             data: { confirm: "Enviar mensagem de interesse ao dono do item?" } %>
       <% elsif @post.status == "taken" %>
-        <span class="rounded-lg bg-gray-300 px-4 py-2 font-semibold text-gray-600 cursor-not-allowed">Item já doado</span>
+        <span class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400 cursor-not-allowed">Item já doado</span>
       <% end %>
     </div>
   </div>
 
   <% if @post.images.attached? %>
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <% @post.images.each do |image| %>
-        <div class="rounded-lg overflow-hidden">
-          <%= image_tag image, alt: "preview", class: "h-96 w-full object-cover" %>
+    <%# Lightbox overlay %>
+    <div id="lightbox"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm"
+         onclick="closeLightbox()">
+      <button class="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition"
+              onclick="closeLightbox()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <img id="lightbox-img" src="" alt=""
+           class="w-[480px] h-[480px] rounded-2xl shadow-2xl object-cover"
+           onclick="event.stopPropagation()" />
+    </div>
+
+    <div class="space-y-3">
+      <%# Main image — hero %>
+      <div class="rounded-2xl overflow-hidden cursor-zoom-in"
+           onclick="openLightbox('<%= url_for(@post.main_image) %>')">
+        <%= image_tag @post.main_image, alt: @post.title, class: "h-96 w-full object-cover hover:brightness-95 transition" %>
+      </div>
+      <%# Other images — smaller grid %>
+      <% if @post.other_images.any? %>
+        <div class="grid grid-cols-3 gap-2">
+          <% @post.other_images.each do |image| %>
+            <div class="rounded-xl overflow-hidden cursor-zoom-in"
+                 onclick="openLightbox('<%= url_for(image) %>')">
+              <%= image_tag image, alt: "foto adicional", class: "h-28 w-full object-cover hover:brightness-95 transition" %>
+            </div>
+          <% end %>
         </div>
       <% end %>
     </div>
+
+    <script>
+      function openLightbox(src) {
+        var lb = document.getElementById('lightbox');
+        document.getElementById('lightbox-img').src = src;
+        lb.classList.remove('hidden');
+        lb.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeLightbox() {
+        var lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeLightbox();
+      });
+    </script>
   <% end %>
 
   <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-    <div class="rounded-lg bg-gray-50 p-4">
-      <p class="text-sm text-gray-600">Categoria</p>
-      <p class="mt-1 font-semibold"><%= @post.category %></p>
+    <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Categoria</p>
+      <p class="mt-1 text-sm font-semibold text-slate-800"><%= @post.category %></p>
     </div>
-    <div class="rounded-lg bg-gray-50 p-4">
-      <p class="text-sm text-gray-600">Condição</p>
-      <p class="mt-1 font-semibold"><%= @post.condition %></p>
+    <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Condição</p>
+      <p class="mt-1 text-sm font-semibold text-slate-800"><%= @post.condition %></p>
     </div>
-    <div class="rounded-lg bg-gray-50 p-4">
-      <p class="text-sm text-gray-600">Localização</p>
-      <p class="mt-1 font-semibold"><%= @post.location %></p>
+    <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Localização</p>
+      <p class="mt-1 text-sm font-semibold text-slate-800"><%= @post.location %></p>
     </div>
-    <div class="rounded-lg bg-gray-50 p-4">
-      <p class="text-sm text-gray-600">Data</p>
-      <p class="mt-1 font-semibold"><%= l(@post.created_at, format: :short) %></p>
+    <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Data</p>
+      <p class="mt-1 text-sm font-semibold text-slate-800"><%= l(@post.created_at, format: :short) %></p>
     </div>
   </div>
 
   <div>
-    <h2 class="text-2xl font-bold">Descrição</h2>
-    <p class="mt-4 whitespace-pre-wrap text-gray-700"><%= @post.description %></p>
+    <h2 class="text-lg font-bold text-slate-800">Descrição</h2>
+    <p class="mt-3 whitespace-pre-wrap text-sm text-slate-600"><%= @post.description %></p>
   </div>
 
   <%# Seção de Avaliação %>
   <% if @post.status == "taken" %>
-    <div class="border-t border-gray-200 pt-6 space-y-6">
-      <h2 class="text-2xl font-bold">Avaliação</h2>
+    <div class="border-t border-slate-200 pt-6 space-y-6">
+      <h2 class="text-lg font-bold text-slate-800">Avaliação</h2>
 
       <% if @post.review.present? %>
-        <%# Exibe a avaliação existente %>
-        <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-5 space-y-3">
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="flex gap-0.5">
                 <% 5.times do |i| %>
-                  <span class="text-xl <%= i < @post.review.rating ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
+                  <span class="text-xl <%= i < @post.review.rating ? 'text-amber-400' : 'text-slate-300' %>">★</span>
                 <% end %>
               </div>
-              <span class="text-sm font-semibold text-gray-700"><%= @post.review.rating %>/5</span>
+              <span class="text-sm font-semibold text-slate-700"><%= @post.review.rating %>/5</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-gray-500">por <%= @post.review.user.name %></span>
+              <span class="text-xs text-slate-500">por <%= @post.review.user.name %></span>
               <% if authenticated? && (@post.user == Current.user || @post.review.user == Current.user) %>
                 <%= button_to "🗑 Remover", post_review_path(@post), method: :delete,
                     data: { confirm: "Tem certeza que deseja remover esta avaliação?" },
-                    class: "rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-200" %>
+                    class: "rounded-lg bg-red-50 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition" %>
               <% end %>
             </div>
           </div>
-          <p class="text-gray-700 text-sm whitespace-pre-wrap"><%= @post.review.comment %></p>
+          <p class="text-slate-700 text-sm whitespace-pre-wrap"><%= @post.review.comment %></p>
         </div>
       <% elsif authenticated? && @post.user != Current.user && !@post.review.present? %>
-        <%# Formulário de avaliação para quem ainda não avaliou %>
-        <div class="rounded-lg border border-gray-200 bg-gray-50 p-5">
-          <p class="text-sm text-gray-600 mb-4">Recebeu este item? Deixe sua avaliação!</p>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <p class="text-sm text-slate-500 mb-4">Recebeu este item? Deixe sua avaliação!</p>
           <%= form_with scope: :review, url: post_review_path(@post), method: :post, data: { turbo: false }, class: "space-y-4" do |f| %>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nota</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Nota</label>
               <div class="flex gap-2 items-center" id="star-rating">
                 <% (1..5).each do |n| %>
                   <button type="button"
-                    class="text-3xl text-gray-300 hover:text-yellow-400 transition star-btn"
+                    class="text-3xl text-slate-300 hover:text-amber-400 transition star-btn"
                     data-value="<%= n %>">★</button>
                 <% end %>
-                <span class="text-sm text-gray-500 ml-2" id="rating-label">Nenhuma nota selecionada</span>
+                <span class="text-sm text-slate-400 ml-2" id="rating-label">Nenhuma nota selecionada</span>
               </div>
               <input type="hidden" name="review[rating]" id="review_rating_input" value="">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Comentário</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Comentário</label>
               <%= f.text_area :comment, rows: 3, placeholder: "Conte como foi a experiência...",
-                  class: "w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none" %>
+                  class: "w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none resize-none" %>
             </div>
             <%= f.submit "Enviar Avaliação",
-                class: "rounded-lg bg-yellow-500 px-5 py-2 text-sm font-semibold text-white hover:bg-yellow-400 cursor-pointer" %>
+                class: "rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-400 transition cursor-pointer" %>
           <% end %>
         </div>
 
@@ -135,15 +179,61 @@
               document.getElementById('review_rating_input').value = val;
               document.getElementById('rating-label').textContent = val + ' de 5';
               document.querySelectorAll('.star-btn').forEach(function(b, i) {
-                b.style.color = (i < val) ? '#facc15' : '#d1d5db';
+                b.style.color = (i < val) ? '#f59e0b' : '#cbd5e1';
               });
             });
           });
         </script>
       <% else %>
-        <p class="text-sm text-gray-400 italic">Nenhuma avaliação ainda.</p>
+        <p class="text-sm text-slate-400 italic">Nenhuma avaliação ainda.</p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# ── Solicitações de doação (só para o dono, enquanto disponível) ── %>
+  <% if Current.user && @post.user == Current.user && @post.status == "available" %>
+    <% claims = @post.post_claims.includes(:user).pending_first %>
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <div class="flex items-center gap-3">
+        <h2 class="text-lg font-bold text-slate-800">Solicitações de Doação</h2>
+        <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+          <%= claims.count { |c| c.pending? } %> pendente(s)
+        </span>
+      </div>
+
+      <% if claims.any? %>
+        <ul class="divide-y divide-slate-100">
+          <% claims.each do |claim| %>
+            <li class="flex items-center justify-between gap-4 py-3">
+              <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-full overflow-hidden ring-2 ring-slate-100 bg-slate-100 shrink-0">
+                  <%= user_avatar_tag claim.user, class: "h-full w-full object-cover" %>
+                </div>
+                <div>
+                  <%= link_to claim.user.name, user_path(claim.user), class: "text-sm font-semibold text-slate-800 hover:text-emerald-600 hover:underline" %>
+                  <p class="text-xs text-slate-400">Solicitado <%= time_ago_in_words(claim.created_at) %> atrás</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <% if claim.pending? %>
+                  <%= button_to "✅ Aceitar", accept_post_post_claim_path(@post, claim), method: :post,
+                      data: { confirm: "Aceitar doação para #{claim.user.name}? O item ficará indisponível para outros." },
+                      class: "rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition" %>
+                  <%= button_to "❌ Rejeitar", reject_post_post_claim_path(@post, claim), method: :post,
+                      class: "rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" %>
+                <% elsif claim.accepted? %>
+                  <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Aceito</span>
+                <% else %>
+                  <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">Rejeitado</span>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-sm text-slate-400">Nenhuma solicitação ainda.</p>
       <% end %>
     </div>
   <% end %>
 </div>
-

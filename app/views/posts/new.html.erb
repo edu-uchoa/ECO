@@ -1,14 +1,14 @@
-<div class="space-y-8">
-  <div>
-    <h1 class="text-3xl font-bold">Criar Novo Post</h1>
-    <p class="text-gray-600 mt-2">Adicione um item para doação</p>
+<div class="mx-auto max-w-2xl space-y-8">
+  <div class="border-b border-slate-200 pb-5">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-800">Adicionar Item para Doação</h1>
+    <p class="mt-1 text-sm text-slate-500">Preencha as informações do item que deseja doar.</p>
   </div>
 
   <%= form_with(model: @post, local: true, class: "space-y-6") do |form| %>
     <% if @post.errors.any? %>
-      <div class="rounded-lg bg-red-50 border border-red-200 p-4">
-        <h2 class="text-red-800 font-semibold"><%= pluralize(@post.errors.count, "erro") %> encontrado:</h2>
-        <ul class="mt-2 list-disc list-inside text-red-700">
+      <div class="rounded-xl bg-red-50 border border-red-200 p-4">
+        <h2 class="text-red-700 font-semibold text-sm"><%= pluralize(@post.errors.count, "erro") %> encontrado:</h2>
+        <ul class="mt-2 list-disc list-inside text-xs text-red-600">
           <% @post.errors.full_messages.each do |message| %>
             <li><%= message %></li>
           <% end %>
@@ -17,45 +17,175 @@
     <% end %>
 
     <div>
-      <%= form.label :title, "Título do Item", class: "block text-sm font-semibold text-gray-700" %>
-      <%= form.text_field :title, placeholder: "Ex: Bicicleta azul", class: "mt-2 block w-full rounded-lg border-gray-300 px-4 py-2 border shadow-sm" %>
+      <%= form.label :title, "Título do Item", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.text_field :title, placeholder: "Ex: Bicicleta azul", class: "mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" %>
     </div>
 
     <div>
-      <%= form.label :description, "Descrição", class: "block text-sm font-semibold text-gray-700" %>
-      <%= form.text_area :description, placeholder: "Descreva o item em detalhes...", rows: 5, class: "mt-2 block w-full rounded-lg border-gray-300 px-4 py-2 border shadow-sm" %>
+      <%= form.label :description, "Descrição", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.text_area :description, placeholder: "Descreva o item em detalhes...", rows: 5, class: "mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none resize-none" %>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <%= form.label :category, "Categoria", class: "block text-sm font-semibold text-gray-700" %>
-        <%= form.select :category, Post::CATEGORIES, { prompt: "Selecione uma categoria" }, class: "mt-2 block w-full rounded-lg border-gray-300 px-4 py-2 border shadow-sm" %>
+        <%= form.label :category, "Categoria", class: "block text-sm font-medium text-slate-700" %>
+        <%= form.select :category, Post::CATEGORIES, { prompt: "Selecione uma categoria" }, class: "mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" %>
       </div>
-
       <div>
-        <%= form.label :condition, "Condição de Uso", class: "block text-sm font-semibold text-gray-700" %>
-        <%= form.select :condition, Post::CONDITIONS, { prompt: "Selecione a condição" }, class: "mt-2 block w-full rounded-lg border-gray-300 px-4 py-2 border shadow-sm" %>
+        <%= form.label :condition, "Condição de Uso", class: "block text-sm font-medium text-slate-700" %>
+        <%= form.select :condition, Post::CONDITIONS, { prompt: "Selecione a condição" }, class: "mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" %>
       </div>
     </div>
 
     <div>
-      <%= form.label :location, "Localização", class: "block text-sm font-semibold text-gray-700" %>
-      <%= form.text_field :location, placeholder: "Ex: Campus CEUB, Bloco A", class: "mt-2 block w-full rounded-lg border-gray-300 px-4 py-2 border shadow-sm" %>
+      <%= form.label :location, "Localização", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.text_field :location, placeholder: "Ex: Campus CEUB, Bloco A", class: "mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" %>
     </div>
 
     <div>
-      <%= form.label :images, "Adicionar Imagens (Máximo 5MB por imagem)", class: "block text-sm font-semibold text-gray-700" %>
-      <div class="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-10">
-        <div class="text-center">
-          <%= form.file_field :images, multiple: true, accept: "image/*", class: "block w-full" %>
-          <p class="mt-2 text-sm text-gray-600">PNG, JPG ou WEBP até 5MB</p>
-        </div>
+      <%= form.label :images, "Fotos do Item (até 4 imagens)", class: "block text-sm font-medium text-slate-700 mb-2" %>
+      <p class="text-xs text-slate-400 mb-3">Adicione até 4 fotos. Clique em uma foto para definir como <strong class="text-slate-600">★ foto principal</strong> (aparece no feed).</p>
+
+      <%= form.hidden_field :main_image_index, value: 0, id: "main_image_index" %>
+
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <% 4.times do |i| %>
+          <div id="slot-<%= i %>"
+               class="relative aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 overflow-hidden cursor-pointer hover:border-emerald-400 transition"
+               onclick="imageSlotClick(<%= i %>)">
+
+            <%# Per-slot hidden file input %>
+            <input type="file" id="slot-input-<%= i %>" accept="image/*"
+                   class="hidden" onchange="imageSlotChange(<%= i %>, this)" />
+
+            <%# Empty placeholder %>
+            <div id="slot-empty-<%= i %>" class="absolute inset-0 flex flex-col items-center justify-center gap-1 text-slate-300">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span class="text-xs"><%= i == 0 ? "Principal" : "Foto #{i + 1}" %></span>
+            </div>
+
+            <%# Preview %>
+            <img id="slot-img-<%= i %>" src="" alt="" class="absolute inset-0 h-full w-full object-cover hidden" />
+
+            <%# Main badge %>
+            <div id="slot-badge-<%= i %>" class="hidden absolute top-1.5 left-1.5 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-bold text-white shadow">★ Principal</div>
+
+            <%# Remove button — stops propagation so it doesn't trigger slot click %>
+            <button type="button" id="slot-remove-<%= i %>"
+                    class="hidden absolute top-1 right-1 rounded-full bg-red-500 p-0.5 text-white hover:bg-red-600 transition z-10"
+                    onclick="event.stopPropagation(); imageSlotRemove(<%= i %>)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        <% end %>
       </div>
+
+      <%# Real file input submitted with the form — populated via DataTransfer %>
+      <%= form.file_field :images, multiple: true, accept: "image/*", class: "hidden", id: "images-submit-input" %>
+
+      <p class="mt-2 text-xs text-slate-400">PNG, JPG ou WEBP até 5MB cada</p>
     </div>
 
-    <div class="flex gap-4">
-      <%= form.submit "Criar Post", class: "rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white shadow-sm hover:bg-blue-500 active:bg-blue-700" %>
-      <%= link_to "Cancelar", dashboard_path, class: "rounded-lg bg-gray-300 px-6 py-2 font-semibold text-gray-900 shadow-sm hover:bg-gray-400" %>
+    <script>
+      var _slotFiles = [null, null, null, null];
+      var _mainIndex = 0;
+
+      function imageSlotClick(i) {
+        if (_slotFiles[i]) {
+          // Slot already has a file — set as main
+          _mainIndex = i;
+          document.getElementById('main_image_index').value = i;
+          _renderAllSlots();
+        } else {
+          // Open this slot's own file input
+          document.getElementById('slot-input-' + i).click();
+        }
+      }
+
+      function imageSlotChange(i, input) {
+        if (!input.files || !input.files[0]) return;
+        var file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          alert('❌ "' + file.name + '" excede 5MB. Escolha uma imagem menor.');
+          input.value = '';
+          return;
+        }
+        _slotFiles[i] = file;
+        // If this is the first image, auto-set as main
+        var hasMain = _slotFiles[_mainIndex] !== null;
+        if (!hasMain) { _mainIndex = i; document.getElementById('main_image_index').value = i; }
+        _renderSlot(i);
+        _syncSubmitInput();
+      }
+
+      function imageSlotRemove(i) {
+        _slotFiles[i] = null;
+        // Reset main if needed
+        if (_mainIndex === i) {
+          _mainIndex = _slotFiles.findIndex(function(f) { return f !== null; });
+          if (_mainIndex === -1) _mainIndex = 0;
+          document.getElementById('main_image_index').value = _mainIndex;
+        }
+        _renderSlot(i);
+        _syncSubmitInput();
+      }
+
+      function _renderSlot(i) {
+        var slot  = document.getElementById('slot-' + i);
+        var img   = document.getElementById('slot-img-' + i);
+        var badge = document.getElementById('slot-badge-' + i);
+        var rem   = document.getElementById('slot-remove-' + i);
+        var empty = document.getElementById('slot-empty-' + i);
+        var f = _slotFiles[i];
+
+        if (f) {
+          img.src = URL.createObjectURL(f);
+          img.classList.remove('hidden');
+          empty.classList.add('hidden');
+          rem.classList.remove('hidden');
+        } else {
+          img.src = '';
+          img.classList.add('hidden');
+          empty.classList.remove('hidden');
+          rem.classList.add('hidden');
+        }
+
+        var isMain = (i === _mainIndex) && f;
+        if (isMain) {
+          badge.classList.remove('hidden');
+          slot.classList.add('ring-2', 'ring-emerald-500', 'border-emerald-400');
+          slot.classList.remove('border-slate-200', 'border-dashed');
+        } else {
+          badge.classList.add('hidden');
+          slot.classList.remove('ring-2', 'ring-emerald-500', 'border-emerald-400');
+          slot.classList.add('border-slate-200', 'border-dashed');
+        }
+      }
+
+      function _renderAllSlots() {
+        for (var i = 0; i < 4; i++) { _renderSlot(i); }
+      }
+
+      function _syncSubmitInput() {
+        var dt = new DataTransfer();
+        // IMPORTANT: add files in slot order so server index matches main_image_index
+        _slotFiles.forEach(function(f) { if (f) dt.items.add(f); });
+        document.getElementById('images-submit-input').files = dt.files;
+        // Recalculate main_image_index as position among non-null files
+        var nonNull = _slotFiles.filter(function(f) { return f !== null; });
+        var mainFile = _slotFiles[_mainIndex];
+        var compactedIndex = nonNull.indexOf(mainFile);
+        document.getElementById('main_image_index').value = compactedIndex >= 0 ? compactedIndex : 0;
+      }
+    </script>
+
+    <div class="flex gap-3">
+      <%= form.submit "Publicar Item", class: "rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition cursor-pointer" %>
+      <%= link_to "Cancelar", dashboard_path, class: "rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition" %>
     </div>
   <% end %>
 </div>

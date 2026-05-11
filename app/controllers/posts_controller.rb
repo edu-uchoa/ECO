@@ -55,6 +55,14 @@ class PostsController < ApplicationController
       return
     end
 
+    # Register the claim (idempotent)
+    claim = @post.post_claims.find_or_initialize_by(user: Current.user)
+    unless claim.persisted?
+      claim.status = "pending"
+      claim.save!
+    end
+
+    # Send chat message as before
     conversation = PrivateConversation.between(Current.user, @post.user)
 
     if conversation.nil?
@@ -90,6 +98,6 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:title, :description, :category, :location, :condition, images: [])
+    params.require(:post).permit(:title, :description, :category, :location, :condition, :main_image_index, images: [])
   end
 end

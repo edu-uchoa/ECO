@@ -17,6 +17,10 @@ class User < ApplicationRecord
   has_many :sent_conversations, class_name: "PrivateConversation", foreign_key: :sender_id, dependent: :destroy
   has_many :received_conversations, class_name: "PrivateConversation", foreign_key: :receiver_id, dependent: :destroy
   has_many :messages, dependent: :destroy
+  has_many :post_claims, dependent: :destroy
+  has_one_attached :avatar
+
+  validate :avatar_format_and_size
 
   def conversations
     PrivateConversation.where("sender_id = ? OR receiver_id = ?", id, id)
@@ -43,6 +47,20 @@ class User < ApplicationRecord
 
   def profile_complete?
     cpf.present? && telefone.present? && uf.present? && cidade.present?
+  end
+
+  private
+
+  def avatar_format_and_size
+    return unless avatar.attached?
+
+    unless avatar.content_type.in?(%w[image/png image/jpeg image/gif image/webp])
+      errors.add(:avatar, "deve ser PNG, JPEG, GIF ou WEBP")
+    end
+
+    if avatar.byte_size > 5.megabytes
+      errors.add(:avatar, "deve ter menos de 5MB")
+    end
   end
 end
 

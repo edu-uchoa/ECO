@@ -3,6 +3,7 @@ class Post < ApplicationRecord
   has_many_attached :images
   has_many :claim_messages, class_name: "Message", dependent: :nullify
   has_one :review, dependent: :destroy
+  has_many :post_claims, dependent: :destroy
 
   STATUSES = %w[available taken].freeze
 
@@ -36,6 +37,19 @@ class Post < ApplicationRecord
   ].freeze
 
   scope :recent, -> { order(created_at: :desc) }
+
+  MAX_IMAGES = 4
+
+  def main_image
+    return nil unless images.attached?
+    idx = (main_image_index || 0).clamp(0, images.count - 1)
+    images[idx]
+  end
+
+  def other_images
+    return [] unless images.attached?
+    images.to_a.reject.with_index { |_, i| i == (main_image_index || 0).clamp(0, images.count - 1) }
+  end
   scope :by_category, ->(category) { where(category: category) if category.present? }
   scope :by_location, ->(location) { where(location: location) if location.present? }
 
@@ -51,6 +65,10 @@ class Post < ApplicationRecord
 
   def validate_images
     return unless images.attached?
+
+    if images.count > MAX_IMAGES
+      errors.add(:images, "máximo de #{MAX_IMAGES} imagens permitido")
+    end
 
     images.each do |image|
       # Validar tipo de conteúdo

@@ -10,6 +10,10 @@ class ProfilesController < ApplicationController
   end
 
  def update
+  if params[:user][:remove_avatar] == "1"
+    @user.avatar.purge
+  end
+
   if @user.update(user_params)
     if @user.saved_change_to_password_digest?
       @user.sessions.delete_all
@@ -38,7 +42,7 @@ end
   end
 
   def user_params
-    permitted = params.require(:user).permit(:name, :email_address, :password, :password_confirmation, :cpf, :telefone, :uf, :cidade)
+    permitted = params.require(:user).permit(:name, :email_address, :password, :password_confirmation, :cpf, :telefone, :uf, :cidade, :avatar)
 
         if permitted[:password].blank?
             permitted.delete(:password)
