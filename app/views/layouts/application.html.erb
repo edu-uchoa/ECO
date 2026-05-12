@@ -39,16 +39,20 @@
 
             <% if authenticated? %>
               <div class="hidden md:flex items-center gap-6">
-                <%= link_to profile_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
-                  <span class="text-sm font-medium">Perfil</span>
+                <%= link_to about_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
+                  <span class="text-sm font-medium">Sobre</span>
+                <% end %>
+
+                <%= link_to map_path, class: "text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
+                  <span class="text-sm font-medium">Mapa</span>
                 <% end %>
 
                 <%= link_to private_conversations_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
                   <span class="text-sm font-medium">Chat</span>
                 <% end %>
 
-                <%= link_to map_path, class: "text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
-                  <span class="text-sm font-medium">Mapa</span>
+                <%= link_to profile_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
+                  <span class="text-sm font-medium">Perfil</span>
                 <% end %>
 
                 <% if Current.user.moderator? %>
@@ -60,6 +64,9 @@
             <% else %>
               <%= link_to map_path, class: "hidden md:inline text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
                 <span class="text-sm font-medium">Mapa</span>
+              <% end %>
+              <%= link_to about_path, class: "hidden md:inline text-slate-600 hover:text-slate-900 transition" do %>
+                <span class="text-sm font-medium">Sobre</span>
               <% end %>
             <% end %>
           </div>
@@ -85,12 +92,20 @@
           <% end %>
 
           <% if authenticated? %>
-            <%= link_to profile_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
-              <span class="text-sm font-medium">Perfil</span>
+            <%= link_to about_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
+              <span class="text-sm font-medium">Sobre</span>
+            <% end %>
+
+            <%= link_to map_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
+              <span class="text-sm font-medium">Mapa</span>
             <% end %>
 
             <%= link_to private_conversations_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
               <span class="text-sm font-medium">Chat</span>
+            <% end %>
+
+            <%= link_to profile_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
+              <span class="text-sm font-medium">Perfil</span>
             <% end %>
 
             <% if Current.user.moderator? %>

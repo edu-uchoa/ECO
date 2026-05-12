@@ -1,66 +1,129 @@
+<% content_for :title, "ECO — Economia Circular" %>
+
 <div class="w-full">
-    <div class="py-8">
-        <div class="max-w-6xl mx-auto px-6 py-12 text-center">
-                        <% if !authenticated? %>
-                            <h2 class="text-4xl font-extrabold mb-4 text-slate-900">Bem Vindo ao Projeto ECO</h2>
-                        <% else %>
-                            <h2 class="text-4xl font-extrabold mb-4 text-slate-900">Bem-vindo ao Projeto ECO</h2>
-                        <% end %>
-            <p class="text-lg text-slate-600 mb-8">Explore itens disponíveis para doação. Cadastre-se para compartilhar seus itens.</p>
 
-            <% if !authenticated? %>
-              <div class="flex justify-center gap-4">
-                  <%= link_to "Começar", new_user_path, class: "px-6 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 font-semibold transition" %>
-              </div>
-            <% end %>
+  <!-- Hero -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-emerald-700 to-emerald-500 text-white">
+    <div class="relative container mx-auto px-6 py-14 text-center">
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+        Promovendo a Economia Circular.
+      </h1>
+      <p class="max-w-xl mx-auto text-emerald-100 text-lg mb-8">
+        Uma plataforma para conectar pessoas e dar nova vida aos itens que você não usa mais.
+      </p>
+      <% if !authenticated? %>
+        <div class="flex justify-center gap-4 flex-wrap">
+          <%= link_to "Começar agora", new_user_path, class: "px-8 py-3 rounded-xl bg-white text-emerald-700 font-bold hover:bg-emerald-50 transition shadow" %>
+          <%= link_to "Entrar", new_session_path, class: "px-8 py-3 rounded-xl border-2 border-white text-white font-bold hover:bg-white/10 transition" %>
         </div>
-
-        <!-- Posts Section -->
-        <div class="max-w-6xl mx-auto px-6 py-12" id="posts-section">
-            <div>
-                <h2 class="text-3xl font-bold mb-6 text-slate-800">Itens para Doação</h2>
-            </div>
-
-            <% @posts = Post.available.recent %>
-            <% if @posts.any? %>
-                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                    <% @posts.each do |post| %>
-                        <div class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition">
-                            <% if post.images.attached? %>
-                                <div class="h-48 overflow-hidden bg-slate-100">
-                                    <%= image_tag post.main_image, alt: post.title, class: "h-full w-full object-cover transition group-hover:scale-105 duration-300" %>
-                                </div>
-                            <% else %>
-                                <div class="h-48 bg-slate-100 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                </div>
-                            <% end %>
-
-                            <div class="p-4 space-y-3">
-                                <div>
-                                    <h3 class="font-semibold text-slate-900"><%= post.title %></h3>
-                                    <%= link_to post.user.name, user_path(post.user), class: "text-xs text-emerald-600 hover:underline font-medium" %>
-                                </div>
-
-                                <p class="line-clamp-2 text-xs text-slate-500"><%= post.description %></p>
-
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"><%= post.category %></span>
-                                    <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700"><%= post.condition %></span>
-                                </div>
-
-                                <div class="text-xs text-slate-400">📍 <%= post.location %></div>
-
-                                <%= link_to "Ver Detalhes", post_path(post), class: "block rounded-xl bg-slate-900 px-4 py-2 text-center text-xs font-semibold text-white hover:bg-slate-700 transition" %>
-                            </div>
-                        </div>
-                    <% end %>
-                </div>
-            <% else %>
-                <div class="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
-                    <p class="text-slate-400">Nenhum item encontrado</p>
-                </div>
-            <% end %>
-        </div>
+      <% end %>
     </div>
+  </section>
+
+  <div class="container mx-auto px-6 mt-14 space-y-14 pb-16">
+
+    <!-- Destaque: imagem grande + texto ao lado -->
+    <div class="grid md:grid-cols-5 gap-8 items-center">
+      <div class="md:col-span-3 rounded-2xl overflow-hidden shadow-lg">
+        <%= image_tag "icons/img3.jpeg", alt: "Plataforma", class: "w-full h-80 object-cover" %>
+      </div>
+      <div class="md:col-span-2 space-y-4">
+        <h2 class="text-2xl font-bold text-slate-800">Economia circular no seu dia a dia</h2>
+        <p class="text-slate-500 leading-relaxed">
+          Aqui você encontra itens doados por pessoas reais, publica o que não usa mais e ainda contribui para reduzir o desperdício.
+        </p>
+        <%= link_to "Ver itens disponíveis", "#posts-section", class: "inline-block mt-2 px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-500 transition" %>
+      </div>
+    </div>
+
+    <!-- 3 pilares em cards horizontais -->
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="flex gap-4 items-start bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition">
+        <span class="text-4xl">♻️</span>
+        <div>
+          <h3 class="font-bold text-slate-800 mb-1">Reutilização</h3>
+          <p class="text-slate-500 text-sm">Cada item doado evita o descarte e ganha uma nova história.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 items-start bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition">
+        <span class="text-4xl">🤝</span>
+        <div>
+          <h3 class="font-bold text-slate-800 mb-1">Comunidade</h3>
+          <p class="text-slate-500 text-sm">Pessoas conectadas por um propósito comum: consumir melhor.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 items-start bg-white rounded-2xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition">
+        <span class="text-4xl">🌍</span>
+        <div>
+          <h3 class="font-bold text-slate-800 mb-1">Impacto real</h3>
+          <p class="text-slate-500 text-sm">Menos lixo, menos emissões, mais consciência ambiental.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Imagem + CTA lado a lado -->
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      <div class="rounded-2xl overflow-hidden shadow-lg">
+        <%= image_tag "icons/img2.avif", alt: "Sustentabilidade", class: "w-full h-64 object-cover" %>
+      </div>
+      <div class="bg-emerald-700 rounded-2xl p-8 text-white flex flex-col justify-center gap-4">
+        <h2 class="text-2xl font-bold">Pronto para fazer parte?</h2>
+        <p class="text-emerald-100 text-sm leading-relaxed">
+          Junte-se a uma comunidade que acredita que pequenas atitudes geram grandes mudanças.
+        </p>
+        <% if !authenticated? %>
+          <%= link_to "Criar minha conta", new_user_path, class: "self-start px-6 py-2.5 rounded-xl bg-white text-emerald-700 font-bold text-sm hover:bg-emerald-50 transition shadow" %>
+        <% else %>
+          <%= link_to "Publicar um item", new_post_path, class: "self-start px-6 py-2.5 rounded-xl bg-white text-emerald-700 font-bold text-sm hover:bg-emerald-50 transition shadow" %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Posts Section -->
+    <div id="posts-section">
+      <h2 class="text-3xl font-bold mb-6 text-slate-800">Itens para Doação</h2>
+
+      <% @posts = Post.available.recent %>
+      <% if @posts.any? %>
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <% @posts.each do |post| %>
+            <div class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition">
+              <% if post.images.attached? %>
+                <div class="h-48 overflow-hidden bg-slate-100">
+                  <%= image_tag post.main_image, alt: post.title, class: "h-full w-full object-cover transition group-hover:scale-105 duration-300" %>
+                </div>
+              <% else %>
+                <div class="h-48 bg-slate-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+              <% end %>
+
+              <div class="p-4 space-y-3">
+                <div>
+                  <h3 class="font-semibold text-slate-900"><%= post.title %></h3>
+                  <%= link_to post.user.name, user_path(post.user), class: "text-xs text-emerald-600 hover:underline font-medium" %>
+                </div>
+
+                <p class="line-clamp-2 text-xs text-slate-500"><%= post.description %></p>
+
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"><%= post.category %></span>
+                  <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700"><%= post.condition %></span>
+                </div>
+
+                <div class="text-xs text-slate-400">📍 <%= post.location %></div>
+
+                <%= link_to "Ver Detalhes", post_path(post), class: "block rounded-xl bg-slate-900 px-4 py-2 text-center text-xs font-semibold text-white hover:bg-slate-700 transition" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+          <p class="text-slate-400">Nenhum item encontrado</p>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
 </div>

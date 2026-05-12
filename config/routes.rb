@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     root "pages#home"
     get "dashboard", to: "pages#dashboard"
     get "mapa", to: "pages#map", as: :map
+    get "about", to: "pages#about", as: :about
     post "chatbot/ask", to: "chatbot#ask", as: :chatbot_ask
 
   resources :collection_points, only: [:index, :create]

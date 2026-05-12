@@ -1,5 +1,5 @@
 class PagesController < ApplicationController
-  allow_unauthenticated_access only: [:home, :map]
+  allow_unauthenticated_access only: [:home, :map, :about]
 
   def home
     redirect_to dashboard_path if authenticated?
@@ -13,5 +13,8 @@ class PagesController < ApplicationController
     return unless authenticated?
 
     @my_collection_points = Current.user.collection_points.order(created_at: :desc).limit(10)
+  end
+
+  def about
   end
 end
