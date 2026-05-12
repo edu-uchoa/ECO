@@ -1,5 +1,5 @@
 class CollectionPointsController < ApplicationController
-  allow_unauthenticated_access only: [:index, :create, :destroy]
+  allow_unauthenticated_access only: [:index, :create]
   skip_before_action :verify_authenticity_token, only: [:create, :destroy]
 
   def index
