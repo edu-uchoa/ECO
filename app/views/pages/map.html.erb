@@ -359,11 +359,14 @@
         Array.from(this.imagesInput.files).forEach(function(f) { fd.append('collection_point[images][]', f); });
       }
 
-      fetch(cfg.createUrl, { method: 'POST', headers: { 'X-CSRF-Token': self._csrf() }, body: fd })
+      fetch(cfg.createUrl, { method: 'POST', headers: { 'X-CSRF-Token': self._csrf(), 'Accept': 'application/json' }, body: fd })
         .then(function(r) {
-          if (r.redirected) { window.location.assign(r.url); return null; }
-          if (r.status === 401) { window.location.assign(cfg.loginUrl); return null; }
-          return r.json().then(function(d) { return { ok: r.ok, data: d }; });
+          if (r.status === 422) {
+            self.showError('Sessão expirada. Recarregue a página e tente novamente.');
+            if (self.submitBtn) { self.submitBtn.disabled = false; self.submitBtn.textContent = 'Enviar para moderação'; }
+            return null;
+          }
+          return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; });
         })
         .then(function(res) {
           if (!res) return;
