@@ -30,8 +30,12 @@ module Authentication
     end
 
     def request_authentication
-      session[:return_to_after_authenticating] = request.url
-      redirect_to new_session_path
+      if request.format.json? || request.xhr?
+        render json: { error: "Você precisa estar autenticado." }, status: :unauthorized
+      else
+        session[:return_to_after_authenticating] = request.url
+        redirect_to new_session_path
+      end
     end
 
     def after_authentication_url

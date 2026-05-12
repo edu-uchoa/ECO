@@ -361,9 +361,10 @@
 
       fetch(cfg.createUrl, { method: 'POST', headers: { 'X-CSRF-Token': self._csrf(), 'Accept': 'application/json' }, body: fd })
         .then(function(r) {
-          if (r.status === 422) {
-            self.showError('Sessão expirada. Recarregue a página e tente novamente.');
+          if (r.status === 401) {
+            self.showError('Sua sessão expirou. Faça login novamente.');
             if (self.submitBtn) { self.submitBtn.disabled = false; self.submitBtn.textContent = 'Enviar para moderação'; }
+            setTimeout(function() { window.location.assign(cfg.loginUrl); }, 2000);
             return null;
           }
           return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; });

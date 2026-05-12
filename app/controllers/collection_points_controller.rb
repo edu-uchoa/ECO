@@ -1,6 +1,6 @@
 class CollectionPointsController < ApplicationController
   allow_unauthenticated_access only: [:index]
-  protect_from_forgery with: :null_session, if: -> { request.format.json? }
+  skip_before_action :verify_authenticity_token, if: -> { request.format.json? || request.content_type&.include?("multipart/form-data") }
 
   def index
     points = CollectionPoint.publicly_visible.includes(:user, images_attachments: :blob)
