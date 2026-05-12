@@ -272,7 +272,12 @@
       if (!confirm('Tem certeza que deseja remover este ponto de coleta?')) return;
       fetch(this.config().deleteUrl + '/' + id, {
         method: 'DELETE',
-        headers: { 'X-CSRF-Token': this._csrf(), 'Accept': 'application/json' }
+        credentials: 'same-origin',
+        headers: {
+          'X-CSRF-Token': this._csrf(),
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
       })
       .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
       .then(function(res) {
@@ -359,7 +364,16 @@
         Array.from(this.imagesInput.files).forEach(function(f) { fd.append('collection_point[images][]', f); });
       }
 
-      fetch(cfg.createUrl, { method: 'POST', headers: { 'X-CSRF-Token': self._csrf(), 'Accept': 'application/json' }, body: fd })
+      fetch(cfg.createUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRF-Token': self._csrf(),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          },
+          body: fd
+        })
         .then(function(r) {
           if (r.status === 401) {
             self.showError('Sua sessão expirou. Faça login novamente.');

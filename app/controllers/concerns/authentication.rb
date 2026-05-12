@@ -30,7 +30,7 @@ module Authentication
     end
 
     def request_authentication
-      if request.format.json? || request.xhr?
+      if request.format.json? || request.xhr? || request.content_type.to_s.include?("multipart/form-data")
         render json: { error: "Você precisa estar autenticado." }, status: :unauthorized
       else
         session[:return_to_after_authenticating] = request.url
