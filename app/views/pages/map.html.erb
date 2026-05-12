@@ -1,13 +1,13 @@
 <div
+  id="map-root"
   class="space-y-6"
-  data-controller="map"
-  data-map-can-create-value="<%= authenticated? && Current.user.profile_complete? %>"
-  data-map-is-auth-value="<%= authenticated? %>"
-  data-map-is-moderator-value="<%= authenticated? && Current.user.moderator? %>"
-  data-map-login-url-value="<%= new_session_path %>"
-  data-map-points-url-value="<%= collection_points_path(format: :json) %>"
-  data-map-create-url-value="<%= collection_points_path %>"
-  data-map-delete-url-value="<%= collection_points_path %>"
+  data-can-create="<%= authenticated? && Current.user.profile_complete? %>"
+  data-is-auth="<%= authenticated? %>"
+  data-is-moderator="<%= authenticated? && Current.user.moderator? %>"
+  data-login-url="<%= new_session_path %>"
+  data-points-url="<%= collection_points_path(format: :json) %>"
+  data-create-url="<%= collection_points_path %>"
+  data-delete-url="<%= collection_points_path %>"
 >
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
     <div>
@@ -26,24 +26,22 @@
         <div class="flex flex-col md:flex-row gap-2 md:items-center">
           <input
             type="text"
-            data-map-target="searchInput"
+            id="map-searchInput"
             placeholder="Pesquisar endereço (ex: Asa Norte, Brasília)"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
           <button
             type="button"
-            data-action="click->map#searchAddress"
+            onclick="EcoMap.searchAddress()"
             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
           >
             Buscar endereço
           </button>
         </div>
-        <p class="text-xs text-gray-500 mt-2">Você também pode clicar no mapa para definir a localização exata do pin.</p>
       </div>
 
       <div
         id="map"
-        data-map-target="canvas"
         style="height:620px;width:100%;position:relative;z-index:0;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.1);background:#e8e8e8;"
       ></div>
     </section>
@@ -53,39 +51,39 @@
         <h2 class="text-lg font-semibold">Adicionar ponto de coleta</h2>
         <p class="text-xs text-gray-500 mt-1">Preencha os dados obrigatórios e envie para análise.</p>
 
-        <div data-map-target="errorBox" class="hidden mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
-        <div data-map-target="successBox" class="hidden mt-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"></div>
+        <div id="map-errorBox" class="hidden mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+        <div id="map-successBox" class="hidden mt-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"></div>
 
-        <form data-map-target="form" data-action="submit->map#submitPoint" class="mt-4 space-y-4" enctype="multipart/form-data">
+        <form id="map-form" onsubmit="EcoMap.submitPoint(event)" class="mt-4 space-y-4" enctype="multipart/form-data">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome do ponto *</label>
-            <input data-map-target="titleInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="120" required />
+            <input id="map-titleInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="120" required />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Endereço completo *</label>
-            <input data-map-target="addressInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="255" required />
+            <input id="map-addressInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="255" required />
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Latitude *</label>
-              <input data-map-target="latitudeInput" type="text" readonly class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
+              <input id="map-latitudeInput" type="text" readonly class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Longitude *</label>
-              <input data-map-target="longitudeInput" type="text" readonly class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
+              <input id="map-longitudeInput" type="text" readonly class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Horário de funcionamento</label>
-            <input data-map-target="openingHoursInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="120" placeholder="Ex: Seg-Sex 08:00 às 18:00" />
+            <input id="map-openingHoursInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="120" placeholder="Ex: Seg-Sex 08:00 às 18:00" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Descrição (opcional)</label>
-            <textarea data-map-target="descriptionInput" rows="3" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="1000"></textarea>
+            <textarea id="map-descriptionInput" rows="3" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" maxlength="1000"></textarea>
           </div>
 
           <div>
@@ -93,7 +91,7 @@
             <div class="grid grid-cols-2 gap-2 text-sm">
               <% ["plástico", "vidro", "papel", "metal", "eletrônico", "óleo", "roupas", "pilhas", "baterias", "outro"].each do |category| %>
                 <label class="inline-flex items-center gap-2 rounded border border-gray-200 px-2 py-1">
-                  <input type="checkbox" value="<%= category %>" data-map-target="categoryCheckbox" />
+                  <input type="checkbox" value="<%= category %>" class="map-categoryCheckbox" />
                   <span><%= category.capitalize %></span>
                 </label>
               <% end %>
@@ -102,17 +100,17 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Imagens (opcional)</label>
-            <input data-map-target="imagesInput" type="file" multiple accept="image/*" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+            <input id="map-imagesInput" type="file" multiple accept="image/*" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
           </div>
 
           <div class="grid grid-cols-1 gap-3">
-            <input data-map-target="contactNameInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (nome)" maxlength="100" />
-            <input data-map-target="contactPhoneInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (telefone)" maxlength="40" />
-            <input data-map-target="contactEmailInput" type="email" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (email)" maxlength="100" />
+            <input id="map-contactNameInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (nome)" maxlength="100" />
+            <input id="map-contactPhoneInput" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (telefone)" maxlength="40" />
+            <input id="map-contactEmailInput" type="email" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Contato (email)" maxlength="100" />
           </div>
 
           <button
-            data-map-target="submitButton"
+            id="map-submitButton"
             type="submit"
             class="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500"
           >
@@ -155,3 +153,275 @@
     </section>
   <% end %>
 </div>
+
+<script>
+(function() {
+  var EcoMapInstance = {
+    map: null,
+    markerIcon: null,
+    selectionMarker: null,
+    _markers: {},
+
+    get root()         { return document.getElementById('map-root'); },
+    get canvas()       { return document.getElementById('map'); },
+    get searchInput()  { return document.getElementById('map-searchInput'); },
+    get errorBox()     { return document.getElementById('map-errorBox'); },
+    get successBox()   { return document.getElementById('map-successBox'); },
+    get titleInput()   { return document.getElementById('map-titleInput'); },
+    get addressInput() { return document.getElementById('map-addressInput'); },
+    get latInput()     { return document.getElementById('map-latitudeInput'); },
+    get lngInput()     { return document.getElementById('map-longitudeInput'); },
+    get hoursInput()   { return document.getElementById('map-openingHoursInput'); },
+    get descInput()    { return document.getElementById('map-descriptionInput'); },
+    get nameInput()    { return document.getElementById('map-contactNameInput'); },
+    get phoneInput()   { return document.getElementById('map-contactPhoneInput'); },
+    get emailInput()   { return document.getElementById('map-contactEmailInput'); },
+    get imagesInput()  { return document.getElementById('map-imagesInput'); },
+    get submitBtn()    { return document.getElementById('map-submitButton'); },
+
+    config: function() {
+      var r = this.root;
+      if (!r) return {};
+      return {
+        canCreate:   r.dataset.canCreate === 'true',
+        isAuth:      r.dataset.isAuth === 'true',
+        isModerator: r.dataset.isModerator === 'true',
+        loginUrl:    r.dataset.loginUrl || '/session/new',
+        pointsUrl:   r.dataset.pointsUrl || '/collection_points.json',
+        createUrl:   r.dataset.createUrl || '/collection_points',
+        deleteUrl:   r.dataset.deleteUrl || '/collection_points'
+      };
+    },
+
+    waitForLeaflet: function(cb, retries) {
+      retries = retries || 0;
+      if (window.L) { cb(); return; }
+      if (retries > 60) {
+        var c = this.canvas;
+        if (c) c.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#6b7280;font-size:14px;padding:16px;text-align:center;">Não foi possível carregar o mapa. Recarregue a página.</div>';
+        return;
+      }
+      var self = this;
+      setTimeout(function() { self.waitForLeaflet(cb, retries + 1); }, 50);
+    },
+
+    init: function() {
+      var self = this;
+      if (!this.canvas) return;
+      if (this.canvas._leaflet_id) return;
+      this.waitForLeaflet(function() { self._initMap(); });
+    },
+
+    _initMap: function() {
+      var self = this;
+      var L = window.L;
+      var canvas = this.canvas;
+      if (!canvas || canvas._leaflet_id) return;
+
+      this.map = L.map(canvas).setView([-15.7801, -47.9292], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
+
+      this.markerIcon = L.divIcon({
+        className: '',
+        html: '<div style="position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center;"><div style="position:absolute;width:34px;height:34px;border-radius:50%;background:rgba(22,163,74,0.22);border:2px solid rgba(22,163,74,0.45);"></div><div style="position:relative;width:14px;height:14px;background:#16a34a;border:3px solid #ffffff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.45);"></div></div>',
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -16]
+      });
+
+      this.map.on('click', function(e) { self.handleMapClick(e); });
+      this._loadPoints();
+    },
+
+    _loadPoints: function() {
+      var self = this;
+      fetch(this.config().pointsUrl)
+        .then(function(r) { return r.json(); })
+        .then(function(points) { points.forEach(function(p) { self.addMarker(p); }); })
+        .catch(function() {});
+    },
+
+    addMarker: function(point) {
+      var self = this;
+      var L = window.L;
+      if (!this.map || !L) return;
+
+      var title = this._esc(point.title || 'Ponto de coleta');
+      var address = this._esc(point.address || '');
+      var cats = Array.isArray(point.categories) ? point.categories.join(', ') : '';
+      var img = Array.isArray(point.image_urls) && point.image_urls.length > 0 ? point.image_urls[0] : null;
+      var imgHtml = img ? '<img src="' + this._escAttr(img) + '" alt="Imagem" style="display:block;width:100%;max-width:220px;height:120px;object-fit:cover;border-radius:8px;margin:6px 0;" loading="lazy" />' : '';
+      var delBtn = point.can_delete ? '<button onclick="EcoMap.deletePoint(' + point.id + ')" style="margin-top:8px;width:100%;padding:5px 0;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">🗑 Remover ponto</button>' : '';
+
+      var parts = ['<b>' + title + '</b>', imgHtml];
+      if (address) parts.push('<div style="margin-top:4px;">' + address + '</div>');
+      if (point.opening_hours) parts.push('<small>Horário: ' + this._esc(point.opening_hours) + '</small>');
+      if (cats) parts.push('<small>Categorias: ' + this._esc(cats) + '</small>');
+      if (point.user) parts.push('<small>Enviado por: ' + this._esc(point.user) + '</small>');
+      if (delBtn) parts.push(delBtn);
+
+      var marker = L.marker([point.latitude, point.longitude], { icon: this.markerIcon })
+        .addTo(this.map)
+        .bindPopup(parts.filter(Boolean).join('<br>'));
+
+      this._markers[point.id] = marker;
+    },
+
+    deletePoint: function(id) {
+      var self = this;
+      if (!confirm('Tem certeza que deseja remover este ponto de coleta?')) return;
+      fetch(this.config().deleteUrl + '/' + id, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-Token': this._csrf(), 'Accept': 'application/json' }
+      })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        if (res.ok) {
+          if (self._markers[id]) { self.map.removeLayer(self._markers[id]); delete self._markers[id]; }
+          self.showSuccess(res.data.message || 'Ponto removido com sucesso.');
+        } else {
+          self.showError(res.data.error || 'Erro ao remover o ponto.');
+        }
+      })
+      .catch(function() { self.showError('Erro de conexão ao tentar remover o ponto.'); });
+    },
+
+    handleMapClick: function(e) {
+      this.setSelectedLocation(e.latlng.lat, e.latlng.lng);
+    },
+
+    searchAddress: function() {
+      var self = this;
+      var q = this.searchInput ? this.searchInput.value.trim() : '';
+      if (!q) { this.showError('Digite um endereço para pesquisar.'); return; }
+      this.showError('');
+      var params = new URLSearchParams({ q: q, format: 'json', limit: '1' });
+      fetch('https://nominatim.openstreetmap.org/search?' + params.toString(), { headers: { Accept: 'application/json' } })
+        .then(function(r) { return r.json(); })
+        .then(function(results) {
+          if (!Array.isArray(results) || results.length === 0) { self.showError('Endereço não encontrado. Tente um termo mais completo.'); return; }
+          var place = results[0];
+          var lat = Number(place.lat), lng = Number(place.lon);
+          if (!isFinite(lat) || !isFinite(lng)) { self.showError('Não foi possível localizar esse endereço no mapa.'); return; }
+          self.map.setView([lat, lng], 15);
+          self.setSelectedLocation(lat, lng);
+          if (self.addressInput && !self.addressInput.value.trim()) self.addressInput.value = place.display_name || q;
+        })
+        .catch(function() { self.showError('Falha ao pesquisar endereço. Tente novamente.'); });
+    },
+
+    setSelectedLocation: function(lat, lng) {
+      var L = window.L;
+      if (!this.map || !L) return;
+      lat = Number(lat); lng = Number(lng);
+      if (this.latInput) this.latInput.value = lat.toFixed(6);
+      if (this.lngInput) this.lngInput.value = lng.toFixed(6);
+      if (this.selectionMarker) this.map.removeLayer(this.selectionMarker);
+      this.selectionMarker = L.marker([lat, lng]).addTo(this.map);
+      this.selectionMarker.bindPopup('Localização selecionada para submissão').openPopup();
+    },
+
+    submitPoint: function(event) {
+      event.preventDefault();
+      var self = this;
+      var cfg = this.config();
+
+      if (!cfg.isAuth) { window.location.assign(cfg.loginUrl); return; }
+      if (!cfg.canCreate) { this.showError('Complete seu perfil antes de enviar um ponto de coleta.'); return; }
+
+      var title   = this.titleInput   ? this.titleInput.value.trim()   : '';
+      var address = this.addressInput ? this.addressInput.value.trim() : '';
+      var lat     = this.latInput     ? this.latInput.value.trim()     : '';
+      var lng     = this.lngInput     ? this.lngInput.value.trim()     : '';
+      var cats    = Array.from(document.querySelectorAll('.map-categoryCheckbox')).filter(function(c) { return c.checked; }).map(function(c) { return c.value; });
+
+      if (title.length < 3)     { this.showError('O nome do ponto precisa ter ao menos 3 caracteres.'); return; }
+      if (address.length < 5)   { this.showError('Informe um endereço completo.'); return; }
+      if (!lat || !lng)         { this.showError('Selecione a localização clicando no mapa ou usando a busca de endereço.'); return; }
+      if (cats.length === 0)    { this.showError('Selecione pelo menos uma categoria de item aceito.'); return; }
+
+      this.showError('');
+      this.showSuccess('');
+      if (this.submitBtn) { this.submitBtn.disabled = true; this.submitBtn.textContent = 'Enviando...'; }
+
+      var fd = new FormData();
+      fd.append('collection_point[title]', title);
+      fd.append('collection_point[address]', address);
+      fd.append('collection_point[latitude]', lat);
+      fd.append('collection_point[longitude]', lng);
+      fd.append('collection_point[opening_hours]', this.hoursInput ? this.hoursInput.value.trim() : '');
+      fd.append('collection_point[description]',   this.descInput  ? this.descInput.value.trim()  : '');
+      fd.append('collection_point[contact_name]',  this.nameInput  ? this.nameInput.value.trim()  : '');
+      fd.append('collection_point[contact_phone]', this.phoneInput ? this.phoneInput.value.trim() : '');
+      fd.append('collection_point[contact_email]', this.emailInput ? this.emailInput.value.trim() : '');
+      cats.forEach(function(c) { fd.append('collection_point[categories][]', c); });
+      if (this.imagesInput && this.imagesInput.files) {
+        Array.from(this.imagesInput.files).forEach(function(f) { fd.append('collection_point[images][]', f); });
+      }
+
+      fetch(cfg.createUrl, { method: 'POST', headers: { 'X-CSRF-Token': self._csrf() }, body: fd })
+        .then(function(r) {
+          if (r.redirected) { window.location.assign(r.url); return null; }
+          if (r.status === 401) { window.location.assign(cfg.loginUrl); return null; }
+          return r.json().then(function(d) { return { ok: r.ok, data: d }; });
+        })
+        .then(function(res) {
+          if (!res) return;
+          if (res.ok) {
+            self.showSuccess(res.data.message || 'Ponto enviado para moderação!');
+            var form = document.getElementById('map-form');
+            if (form) form.reset();
+          } else {
+            var msg = res.data && res.data.errors ? res.data.errors.join(', ') : (res.data && res.data.error ? res.data.error : 'Erro ao enviar o ponto.');
+            self.showError(msg);
+          }
+          if (self.submitBtn) { self.submitBtn.disabled = false; self.submitBtn.textContent = 'Enviar para moderação'; }
+        })
+        .catch(function() {
+          self.showError('Erro de conexão. Tente novamente.');
+          if (self.submitBtn) { self.submitBtn.disabled = false; self.submitBtn.textContent = 'Enviar para moderação'; }
+        });
+    },
+
+    showError: function(msg) {
+      var el = this.errorBox;
+      if (!el) return;
+      if (msg) { el.textContent = msg; el.classList.remove('hidden'); }
+      else { el.textContent = ''; el.classList.add('hidden'); }
+    },
+
+    showSuccess: function(msg) {
+      var el = this.successBox;
+      if (!el) return;
+      if (msg) { el.textContent = msg; el.classList.remove('hidden'); }
+      else { el.textContent = ''; el.classList.add('hidden'); }
+    },
+
+    _csrf: function() {
+      var m = document.querySelector('meta[name="csrf-token"]');
+      return m ? m.getAttribute('content') : '';
+    },
+
+    _esc: function(v) {
+      return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    },
+
+    _escAttr: function(v) {
+      return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  };
+
+  window.EcoMap = EcoMapInstance;
+
+  function tryInit() {
+    if (document.getElementById('map-root')) {
+      EcoMapInstance.init();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', tryInit);
+  document.addEventListener('turbo:load', tryInit);
+  document.addEventListener('turbo:render', tryInit);
+  tryInit();
+})();
+</script>
