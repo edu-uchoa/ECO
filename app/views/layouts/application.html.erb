@@ -28,99 +28,109 @@
 
   <body class="flex flex-col min-h-screen bg-slate-50">
     <!-- Navbar -->
-  <nav class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 shadow-sm z-[2000]">
-      <div class="container mx-auto px-4 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-8">
-            <!-- Site title removed: Home link is available in the navbar -->
-            <%= link_to root_path, class: "hidden md:inline-flex items-center mr-2 text-slate-600 hover:text-slate-900 transition", title: 'Home' do %>
-              <%= image_tag 'icons/home.png', alt: 'Home', class: 'h-10 w-auto' %>
-            <% end %>
+    <nav class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 shadow-sm z-[2000]" data-controller="navbar">
+
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+
+          <!-- Logo -->
+          <%= link_to root_path, class: "flex items-center shrink-0", title: "Home" do %>
+            <%= image_tag 'icons/home.png', alt: 'ECO', class: 'h-9 w-auto' %>
+          <% end %>
+
+          <!-- Desktop links -->
+          <div class="hidden md:flex items-center gap-6">
+            <%= link_to "Sobre", about_path, class: "text-sm font-medium text-slate-600 hover:text-emerald-700 transition" %>
+            <%= link_to "Mapa", map_path, class: "text-sm font-medium text-slate-600 hover:text-emerald-700 transition", data: { turbo: false } %>
 
             <% if authenticated? %>
-              <div class="hidden md:flex items-center gap-6">
-                <%= link_to about_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
-                  <span class="text-sm font-medium">Sobre</span>
-                <% end %>
-
-                <%= link_to map_path, class: "text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
-                  <span class="text-sm font-medium">Mapa</span>
-                <% end %>
-
-                <%= link_to private_conversations_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
-                  <span class="text-sm font-medium">Chat</span>
-                <% end %>
-
-                <%= link_to profile_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
-                  <span class="text-sm font-medium">Perfil</span>
-                <% end %>
-
-                <% if Current.user.moderator? %>
-                  <%= link_to moderation_dashboard_path, class: "text-slate-600 hover:text-slate-900 transition" do %>
-                    <span class="text-sm font-medium">Moderação</span>
-                  <% end %>
-                <% end %>
-              </div>
-            <% else %>
-              <%= link_to map_path, class: "hidden md:inline text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
-                <span class="text-sm font-medium">Mapa</span>
-              <% end %>
-              <%= link_to about_path, class: "hidden md:inline text-slate-600 hover:text-slate-900 transition" do %>
-                <span class="text-sm font-medium">Sobre</span>
+              <%= link_to "Chat", private_conversations_path, class: "text-sm font-medium text-slate-600 hover:text-emerald-700 transition" %>
+              <%= link_to "Perfil", profile_path, class: "text-sm font-medium text-slate-600 hover:text-emerald-700 transition" %>
+              <% if Current.user.moderator? %>
+                <%= link_to "Moderação", moderation_dashboard_path, class: "text-sm font-medium text-slate-600 hover:text-emerald-700 transition" %>
               <% end %>
             <% end %>
           </div>
 
-          <div class="flex items-center gap-4">
+          <!-- Desktop right side -->
+          <div class="hidden md:flex items-center gap-3">
             <% if authenticated? %>
-              <span class="text-sm text-slate-600 hidden md:inline">Olá, <%= Current.user.name %></span>
-              <div class="hidden md:block">
-                <%= user_avatar_tag Current.user, class: "h-8 w-8 rounded-full object-cover ring-2 ring-emerald-200" %>
-              </div>
-              <%= button_to "Logout", session_path, method: :delete, class: "rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 active:bg-red-700" %>
+              <%= user_avatar_tag Current.user, class: "h-8 w-8 rounded-full object-cover ring-2 ring-emerald-200" %>
+              <span class="text-sm text-slate-600 max-w-[120px] truncate">Olá, <%= Current.user.name %></span>
+              <%= button_to "Sair", session_path, method: :delete, class: "rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-500 transition" %>
             <% else %>
               <%= link_to "Login", new_session_path, class: "px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 text-sm font-semibold transition" %>
-              <%= link_to "Sign up", new_user_path, class: "px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-semibold transition" %>
+              <%= link_to "Cadastrar", new_user_path, class: "px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-semibold transition" %>
             <% end %>
           </div>
-        </div>
 
-        <!-- Mobile Navigation -->
-        <div class="flex md:hidden justify-around mt-4 pt-4 border-t border-slate-200">
-          <%= link_to root_path, class: "flex items-center mr-3 text-slate-600 hover:text-slate-900 transition", title: 'Home' do %>
-            <%= image_tag 'icons/home.png', alt: 'Home', class: 'h-12 w-auto' %>
-          <% end %>
+          <!-- Hamburger button (mobile only) -->
+          <button
+            type="button"
+            data-action="click->navbar#toggle"
+            data-navbar-target="hamburger"
+            class="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+            aria-label="Abrir menu"
+          >
+            <!-- Icon: bars (closed state) -->
+            <svg data-navbar-target="iconOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <!-- Icon: X (open state) -->
+            <svg data-navbar-target="iconClose" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
-          <% if authenticated? %>
-            <%= link_to about_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
-              <span class="text-sm font-medium">Sobre</span>
-            <% end %>
-
-            <%= link_to map_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
-              <span class="text-sm font-medium">Mapa</span>
-            <% end %>
-
-            <%= link_to private_conversations_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
-              <span class="text-sm font-medium">Chat</span>
-            <% end %>
-
-            <%= link_to profile_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
-              <span class="text-sm font-medium">Perfil</span>
-            <% end %>
-
-            <% if Current.user.moderator? %>
-              <%= link_to moderation_dashboard_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition" do %>
-                <span class="text-sm font-medium">Moderação</span>
-              <% end %>
-            <% end %>
-          <% end %>
-
-          <%= link_to map_path, class: "flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 transition", data: { turbo: false } do %>
-            <span class="text-sm font-medium">Mapa</span>
-          <% end %>
-        </div>
         </div>
       </div>
+
+      <!-- Mobile menu (hidden by default) -->
+      <div
+        data-navbar-target="menu"
+        class="hidden md:hidden border-t border-slate-200 bg-white"
+      >
+        <div class="container mx-auto px-4 py-3 flex flex-col gap-1">
+
+          <% if authenticated? %>
+            <!-- User info -->
+            <div class="flex items-center gap-3 py-3 mb-1 border-b border-slate-100">
+              <%= user_avatar_tag Current.user, class: "h-10 w-10 rounded-full object-cover ring-2 ring-emerald-200 shrink-0" %>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-800 truncate"><%= Current.user.name %></p>
+                <p class="text-xs text-slate-500 truncate"><%= Current.user.email_address %></p>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Nav links -->
+          <%= link_to "Sobre", about_path, class: "flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-sm font-medium" %>
+
+          <%= link_to "Mapa", map_path, class: "flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-sm font-medium", data: { turbo: false } %>
+
+          <% if authenticated? %>
+            <%= link_to "Chat", private_conversations_path, class: "flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-sm font-medium" %>
+
+            <%= link_to "Perfil", profile_path, class: "flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-sm font-medium" %>
+
+            <% if Current.user.moderator? %>
+              <%= link_to "Moderação", moderation_dashboard_path, class: "flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition text-sm font-medium" %>
+            <% end %>
+
+            <div class="pt-2 mt-1 border-t border-slate-100">
+              <%= button_to "Sair", session_path, method: :delete, class: "w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition text-sm font-medium" %>
+            </div>
+
+          <% else %>
+            <div class="flex flex-col gap-2 pt-2 mt-1 border-t border-slate-100">
+              <%= link_to "Login", new_session_path, class: "block text-center px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-500 transition" %>
+              <%= link_to "Cadastrar", new_user_path, class: "block text-center px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition" %>
+            </div>
+          <% end %>
+
+        </div>
+      </div>
+
     </nav>
 
     <!-- Main Content -->
