@@ -62,7 +62,7 @@ class CollectionPoint < ApplicationRecord
     end
   end
 
-  def as_map_json
+  def as_map_json(moderator: false)
     {
       id: id,
       title: title,
@@ -76,11 +76,12 @@ class CollectionPoint < ApplicationRecord
       contact_phone: contact_phone,
       contact_email: contact_email,
       status: status,
-  approved_at: approved_at,
-  rejection_reason: rejection_reason,
+      approved_at: approved_at,
+      rejection_reason: rejection_reason,
       user: user.name,
       image_urls: images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image, only_path: true) },
-      created_at: created_at.strftime("%d/%m/%Y")
+      created_at: created_at.strftime("%d/%m/%Y"),
+      can_delete: moderator
     }
   end
 

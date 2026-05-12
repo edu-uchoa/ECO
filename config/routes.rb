@@ -40,7 +40,7 @@ Rails.application.routes.draw do
     get "about", to: "pages#about", as: :about
     post "chatbot/ask", to: "chatbot#ask", as: :chatbot_ask
 
-  resources :collection_points, only: [:index, :create]
+  resources :collection_points, only: [:index, :create, :destroy]
 
   get "moderation", to: "moderation/collection_points#index", as: :moderation_dashboard
 

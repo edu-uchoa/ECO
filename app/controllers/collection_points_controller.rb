@@ -3,7 +3,8 @@ class CollectionPointsController < ApplicationController
 
   def index
     points = CollectionPoint.publicly_visible.includes(:user, images_attachments: :blob)
-    render json: points.map(&:as_map_json)
+    is_moderator = authenticated? && Current.user.moderator?
+    render json: points.map { |p| p.as_map_json(moderator: is_moderator) }
   end
 
   def create
@@ -23,6 +24,19 @@ class CollectionPointsController < ApplicationController
     else
       render json: { error: point.errors.full_messages.to_sentence }, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    unless Current.user.moderator?
+      render json: { error: "Acesso negado." }, status: :forbidden
+      return
+    end
+
+    point = CollectionPoint.find(params[:id])
+    point.destroy!
+    render json: { message: "Ponto de coleta removido com sucesso." }, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Ponto não encontrado." }, status: :not_found
   end
 
   private

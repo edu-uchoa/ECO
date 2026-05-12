@@ -24,9 +24,11 @@ export default class extends Controller {
   static values = {
     canCreate: Boolean,
     isAuth: Boolean,
+    isModerator: Boolean,
     loginUrl: String,
     pointsUrl: String,
-    createUrl: String
+    createUrl: String,
+    deleteUrl: String
   }
 
   connect() {
@@ -223,18 +225,63 @@ export default class extends Controller {
       ? `<img src="${this.escapeAttribute(firstImage)}" alt="Imagem do ponto" style="display:block;width:100%;max-width:220px;height:120px;object-fit:cover;border-radius:8px;margin:6px 0;" loading="lazy" />`
       : ""
 
+    const deleteButtonHtml = point.can_delete
+      ? `<button
+           onclick="window._mapDeletePoint(${point.id})"
+           style="margin-top:8px;width:100%;padding:5px 0;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;"
+         >🗑 Remover ponto</button>`
+      : ""
+
     const popup = [
       `<b>${title}</b>`,
       imageHtml,
       address ? `<div style="margin-top:4px;">${this.escapeHtml(address)}</div>` : "",
       point.opening_hours ? `<small>Horário: ${this.escapeHtml(point.opening_hours)}</small>` : "",
       categories ? `<small>Categorias: ${this.escapeHtml(categories)}</small>` : "",
-      point.user ? `<small>Enviado por: ${this.escapeHtml(point.user)}</small>` : ""
+      point.user ? `<small>Enviado por: ${this.escapeHtml(point.user)}</small>` : "",
+      deleteButtonHtml
     ].filter(Boolean).join("<br>")
 
-    window.L.marker([point.latitude, point.longitude], { icon: this.markerIcon })
+    const marker = window.L.marker([point.latitude, point.longitude], { icon: this.markerIcon })
       .addTo(this.map)
       .bindPopup(popup)
+
+    // Store marker reference for removal
+    if (!this._markers) this._markers = {}
+    this._markers[point.id] = marker
+
+    // Expose delete handler globally so inline onclick can call it
+    window._mapDeletePoint = (id) => this.deletePoint(id)
+  }
+
+  async deletePoint(id) {
+    if (!confirm("Tem certeza que deseja remover este ponto de coleta? Esta ação não pode ser desfeita.")) return
+
+    try {
+      const url = `${this.deleteUrlValue}/${id}`
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "X-CSRF-Token": this.csrfToken(),
+          "Accept": "application/json"
+        }
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (response.ok) {
+        // Remove marker from map
+        if (this._markers && this._markers[id]) {
+          this.map.removeLayer(this._markers[id])
+          delete this._markers[id]
+        }
+        this.showSuccess(data.message || "Ponto removido com sucesso.")
+      } else {
+        this.showError(data.error || "Erro ao remover o ponto.")
+      }
+    } catch (_error) {
+      this.showError("Erro de conexão ao tentar remover o ponto.")
+    }
   }
 
   handleMapClick(event) {
