@@ -1,5 +1,5 @@
 class CollectionPoint < ApplicationRecord
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :approver, class_name: "User", foreign_key: :approved_by, optional: true
   has_many :moderation_logs, dependent: :destroy
 

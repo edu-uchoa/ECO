@@ -1,6 +1,6 @@
 class CollectionPointsController < ApplicationController
-  allow_unauthenticated_access only: [:index]
-  skip_before_action :verify_authenticity_token, if: -> { request.format.json? || request.content_type&.include?("multipart/form-data") }
+  allow_unauthenticated_access only: [:index, :create, :destroy]
+  skip_before_action :verify_authenticity_token, only: [:create, :destroy]
 
   def index
     points = CollectionPoint.publicly_visible.includes(:user, images_attachments: :blob)
@@ -9,17 +9,18 @@ class CollectionPointsController < ApplicationController
   end
 
   def create
-    unless Current.user.profile_complete?
-      render json: { error: "Você precisa completar seu perfil antes de adicionar um ponto de coleta." }, status: :forbidden
-      return
-    end
+    point = CollectionPoint.new(collection_point_params)
 
-    point = Current.user.collection_points.build(collection_point_params)
-    point.status = Current.user.moderator? ? :approved : :pending
+    if authenticated?
+      point.user = Current.user
+      point.status = Current.user.moderator? ? :approved : :pending
+    else
+      point.status = :pending
+    end
 
     if point.save
       render json: {
-        message: point.pending? ? "Seu item está em análise." : "Item aprovado e publicado com sucesso.",
+        message: "Seu ponto foi enviado para moderação!",
         point: point.as_map_json
       }, status: :created
     else

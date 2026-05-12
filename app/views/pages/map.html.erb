@@ -331,9 +331,6 @@
       var self = this;
       var cfg = this.config();
 
-      if (!cfg.isAuth) { window.location.assign(cfg.loginUrl); return; }
-      if (!cfg.canCreate) { this.showError('Complete seu perfil antes de enviar um ponto de coleta.'); return; }
-
       var title   = this.titleInput   ? this.titleInput.value.trim()   : '';
       var address = this.addressInput ? this.addressInput.value.trim() : '';
       var lat     = this.latInput     ? this.latInput.value.trim()     : '';
