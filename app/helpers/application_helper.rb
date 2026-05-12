@@ -40,7 +40,13 @@ module ApplicationHelper
     options[:alt]   ||= user.name
     options[:class] ||= "h-10 w-10 rounded-full object-cover"
     if user.avatar.attached?
-      image_tag url_for(user.avatar), **options
+      begin
+        url = user.avatar.url
+        image_tag url, **options
+      rescue => e
+        Rails.logger.warn("Avatar URL error for user #{user.id}: #{e.message}")
+        image_tag "default_avatar.svg", **options
+      end
     else
       image_tag "default_avatar.svg", **options
     end
