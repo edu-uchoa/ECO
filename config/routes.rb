@@ -1,7 +1,4 @@
 Rails.application.routes.draw do
-  # ROTA ADMINISTRATIVA TEMPORÁRIA — remover após uso
-  get "/admin/set-moderator", to: "admin#set_moderator"
-
   resource :session
   resources :passwords, param: :token
   resources :users, only: [:new, :create, :show]
